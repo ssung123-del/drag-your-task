@@ -142,7 +142,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <h1 className="text-xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
                         🎯 드래그 유얼 테스크
                     </h1>
-                    <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-full">v1.2</span>
+
+                    {/* 모바일 프로필/로그인 익스텐션 */}
+                    <div className="flex items-center gap-2">
+                        {user ? (
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-2 bg-gray-50 p-1 pr-3 rounded-full border border-gray-100 active:scale-95 transition-all"
+                            >
+                                {user.photoURL ? (
+                                    <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full shadow-sm" />
+                                ) : (
+                                    <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-500">
+                                        <User size={14} />
+                                    </div>
+                                )}
+                                <span className="text-[10px] font-bold text-gray-500">로그아웃</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleLogin}
+                                className="flex items-center gap-1.5 bg-indigo-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black shadow-lg shadow-indigo-200 active:scale-95 transition-all"
+                            >
+                                <User size={12} />
+                                로그인
+                            </button>
+                        )}
+                    </div>
                 </header>
 
                 {/* PC 상단 바 (md 이상, 미니멀) */}
@@ -168,7 +194,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             className={({ isActive }) =>
                                 clsx(
                                     "flex flex-col items-center justify-center w-full py-2 transition-all duration-200 active:scale-90",
-                                    isActive ? "text-[#007AFF]" : "text-gray-400 hover:text-gray-600"
+                                    isActive ? "text-indigo-600" : "text-gray-400 hover:text-gray-600"
                                 )
                             }
                         >

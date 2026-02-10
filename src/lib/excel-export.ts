@@ -31,15 +31,15 @@ export const generateExcel = async (
     // --- Layout Setup ---
     // Columns: A(Time), B(Sun), C(Mon), D(Tue), E(Wed), F(Thu), G(Fri), H(Sat), I(Next Plan)
     worksheet.columns = [
-        { key: 'time', width: 8 },
-        { key: 'sun', width: 14 },
-        { key: 'mon', width: 14 },
-        { key: 'tue', width: 14 },
-        { key: 'wed', width: 14 },
-        { key: 'thu', width: 14 },
-        { key: 'fri', width: 14 },
-        { key: 'sat', width: 14 },
-        { key: 'plan', width: 14 },
+        { key: 'time', width: 8, style: { font: fontBase } },
+        { key: 'sun', width: 14, style: { font: fontBase } },
+        { key: 'mon', width: 14, style: { font: fontBase } },
+        { key: 'tue', width: 14, style: { font: fontBase } },
+        { key: 'wed', width: 14, style: { font: fontBase } },
+        { key: 'thu', width: 14, style: { font: fontBase } },
+        { key: 'fri', width: 14, style: { font: fontBase } },
+        { key: 'sat', width: 14, style: { font: fontBase } },
+        { key: 'plan', width: 14, style: { font: fontBase } },
     ];
 
     // Title Row (1)
@@ -111,6 +111,7 @@ export const generateExcel = async (
         timeRowMap[time] = rowIdx;
         const row = worksheet.getRow(rowIdx);
         row.height = 30; // Consistent height
+        row.font = fontBase; // Apply to row level for better clipboard compatibility
 
         // Time Column (A)
         const timeCell = row.getCell(1);

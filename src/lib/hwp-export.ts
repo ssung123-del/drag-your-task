@@ -5,9 +5,8 @@ import type { MinistryEntry, WeeklyPlan, WeeklyNote, UserProfile } from '../type
 import { TIME_SLOTS } from '../types';
 
 /**
- * 초안정형 한글(HWP) 복사 기능
- * 한글 프로그램의 충돌을 방지하기 위해 9열(1+7+1) 구조를 완벽하게 유지합니다.
- * rowspan을 제거하여 붙여넣기 안정성을 극대화했습니다.
+ * 한글(HWP) 표 채우기 전용 복사 기능
+ * 헤더를 제외하고 04:00 데이터부터 시작하는 순수 그리드 데이터만 8pt 서식으로 복사합니다.
  */
 export const copyToHWPClipboard = async (
     weekStartDate: Date,
@@ -16,23 +15,11 @@ export const copyToHWPClipboard = async (
     weeklyNotes: WeeklyNote | undefined,
     profile: UserProfile
 ) => {
-    const fontStyle = "font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; font-size: 8pt; line-height: 1.2;";
-    const borderStyle = "border: 0.5pt solid black;";
-    const headerBg = "background-color: #BDD7EE;";
-    const mealBg = "background-color: #F2F2F2;";
+    // 폰트 및 스타일 정의 (한글 호환성 극대화)
+    const fontStyle = "font-family: 'Malgun Gothic', '맑은 고딕'; font-size: 8pt;";
+    const tdStyle = `border: 0.5pt solid black; padding: 2px; vertical-align: top; ${fontStyle}`;
 
-    let html = `<table style="border-collapse: collapse; width: 100%; ${fontStyle}">`;
-
-    // 1. 헤더 (항상 9개 컬럼: 구분1 + 요일7 + 계획1)
-    html += `<tr style="${headerBg} font-weight: bold; text-align: center; height: 30px;">`;
-    html += `<td style="${borderStyle} width: 50px;">구분</td>`;
-    for (let i = 0; i < 7; i++) {
-        html += `<td style="${borderStyle}">${format(addDays(weekStartDate, i), 'M.d(eee)', { locale: ko })}</td>`;
-    }
-    html += `<td style="${borderStyle}">주간계획</td>`;
-    html += `</tr>`;
-
-    // 2. 데이터 매핑
+    // 타임라인 데이터 매핑
     const timeRowData: { [key: string]: string[] } = {};
     TIME_SLOTS.forEach(t => { timeRowData[t] = Array(7).fill(""); });
 
@@ -45,27 +32,30 @@ export const copyToHWPClipboard = async (
         }
     });
 
-    // 3. 행 생성 (모든 행은 반드시 9개의 논리적 셀을 가져야 함)
+    const plans = weeklyPlans?.plans || {};
+
+    // HTML 생성 (헤더 없이 데이터 행부터 시작)
+    let html = `<table style="border-collapse: collapse; width: 100%;">`;
+
     TIME_SLOTS.forEach((time, idx) => {
-        html += `<tr style="height: 40px;">`;
+        html += `<tr style="height: 35px;">`;
 
-        // [1] 시간 셀
-        html += `<td style="${borderStyle} ${mealBg} text-align: center;">${time}</td>`;
+        // [1] 시간 열
+        html += `<td style="${tdStyle} text-align: center; width: 60px; background-color: #F2F2F2;">${time}</td>`;
 
-        // [2] 사역 내용 셀 (7개)
+        // [2] 데이터 열 (7개)
         if (time === '11:40' || time === '17:00') {
             const label = time === '11:40' ? '점 심 식 사' : '저 녁 식 사';
-            html += `<td colspan="7" style="${borderStyle} ${mealBg} text-align: center; font-weight: bold;">${label}</td>`;
+            // 병합된 칸 뒤에도 칸 개수를 맞추기 위해 colspan 사용
+            html += `<td colspan="7" style="${tdStyle} text-align: center; background-color: #F2F2F2; font-weight: bold;">${label}</td>`;
         } else {
             for (let d = 0; d < 7; d++) {
-                html += `<td style="${borderStyle} padding: 4px; vertical-align: top; text-align: left;">${timeRowData[time][d]}</td>`;
+                html += `<td style="${tdStyle} text-align: left;">${timeRowData[time][d]}</td>`;
             }
         }
 
-        // [3] 계획 셀 (1개) - 행 불일치 방지를 위해 무조건 추가
-        // HWP 안정성을 위해 rowspan 대신 텍스트로만 구분
+        // [3] 계획 열 (항상 존재해야 구조가 안 깨짐)
         let planText = "";
-        const plans = weeklyPlans?.plans || {};
         if (idx === 0) planText = `[주일] ${plans[0] || ''}`;
         else if (idx === 2) planText = `[월] ${plans[1] || ''}`;
         else if (idx === 4) planText = `[화] ${plans[2] || ''}`;
@@ -75,13 +65,14 @@ export const copyToHWPClipboard = async (
         else if (idx === 14) planText = `[토] ${plans[6] || ''}`;
         else if (idx === 16) planText = `[비고] ${plans[7] || ''}`;
 
-        html += `<td style="${borderStyle} padding: 4px; vertical-align: top; font-size: 7pt;">${planText}</td>`;
+        html += `<td style="${tdStyle} text-align: left; font-size: 7pt;">${planText}</td>`;
 
         html += `</tr>`;
     });
 
     html += `</table>`;
 
+    // 클립보드 복사 (HTML 형식)
     const type = "text/html";
     const blob = new Blob([html], { type });
     const data = [new ClipboardItem({ [type]: blob })];
@@ -90,7 +81,7 @@ export const copyToHWPClipboard = async (
         await navigator.clipboard.write(data);
         return true;
     } catch (err) {
-        console.error("HWP Copy Failed:", err);
+        console.error("HWP Copy failed:", err);
         return false;
     }
 };

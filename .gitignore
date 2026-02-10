@@ -25,3 +25,5 @@ dist-ssr
 
 # HWPX temp
 hwpx_temp/
+.vercel
+.env*.local

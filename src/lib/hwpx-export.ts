@@ -74,8 +74,10 @@ export const generateHwpx = async (
         const dateRangeStr = `${format(weekStart, 'yyyy. M. d.')} ~ ${format(weekEnd, 'M. d.')}`;
         setCellText(0, 2, dateRangeStr);
 
-        setCellText(0, 7, profile.department);
-        setCellText(0, 11, profile.name);
+        // Col 7은 "부서" 라벨, Col 8이 부서 데이터 입력 칸
+        // Col 9는 "사역자" 라벨, Col 12가 이름 데이터 입력 칸 (C10-C11은 cellAddr 없음)
+        setCellText(0, 8, profile.department);
+        setCellText(0, 12, profile.name);
 
         // 2. 날짜 라벨 (주일, 화~토) - Row 2
         const dateOffsets = [0, 2, 3, 4, 5, 6];
@@ -113,7 +115,8 @@ export const generateHwpx = async (
             });
         });
 
-        // 4. 심방 통계 (Row 24, 25, 26)
+        // 4. 심방 통계 (Row 16=방문, Row 17=카페, Row 18=전화)
+        // 왜 이 Row인가? → 템플릿 XML 분석 결과 심방기록 영역이 Row 16~18에 위치
         dateOffsets.forEach((dayOffset, dayIdx) => {
             const targetDate = format(addDays(weekStart, dayOffset), 'yyyy-MM-dd');
             const dayEntries = entries.filter(e => e.date === targetDate);
@@ -123,31 +126,43 @@ export const generateHwpx = async (
             const cCount = dayEntries.filter(e => e.subType === '카페심방').length;
             const pCount = dayEntries.filter(e => e.subType === '전화심방').length;
 
-            setCellText(24, col, `방문심방 : ${vCount || 0} 회`);
-            setCellText(25, col, `카페심방 : ${cCount || 0} 회`);
-            setCellText(26, col, `전화심방 : ${pCount || 0} 회`);
+            setCellText(16, col, `방문심방 : ${vCount || 0} 회`);
+            setCellText(17, col, `카페심방 : ${cCount || 0} 회`);
+            setCellText(18, col, `전화심방 : ${pCount || 0} 회`);
         });
 
-        // 합계 (Col 10?) -> XML 확인 결과 Col 10이 합계 칸인듯 함
+        // 합계 (Col 10, Row 16~18)
         const totalVisit = entries.filter(e => e.subType === '방문심방').length;
         const totalCafe = entries.filter(e => e.subType === '카페심방').length;
         const totalPhone = entries.filter(e => e.subType === '전화심방').length;
-        setCellText(24, 10, `방문심방 : 총 ${totalVisit} 회`);
-        setCellText(25, 10, `카페심방 : 총 ${totalCafe} 회`);
-        setCellText(26, 10, `전화심방 : 총 ${totalPhone} 회`);
+        setCellText(16, 10, `방문심방 : 총 ${totalVisit} 회`);
+        setCellText(17, 10, `카페심방 : 총 ${totalCafe} 회`);
+        setCellText(18, 10, `전화심방 : 총 ${totalPhone} 회`);
 
-        // 5. 다음 주간 계획 (우측)
+        // 5. 다음 주간 계획 (우측 Col 12)
+        // 템플릿에서 다음주간계획 영역은 Col 11에 라벨이 있고, Col 12에 입력 칸이 위치
         if (plan) {
-            const planRows = [4, 6, 8, 9, 11, 13, 15]; // 주일, 화, 수, 목, 금, 토, 비고
+            const planRows = [3, 4, 5, 6, 7, 8, 9]; // 주일, 화, 수, 목, 금, 토, 비고 순서
             planRows.forEach((row, i) => {
-                const content = Object.values(plan.plans)[i] || '';
+                const content = plan.plans[i] || ''; // idx 0~6 매핑
                 setCellText(row, 11, content);
             });
         }
 
         // 6. 특이사항 (하단)
         if (note) {
-            setCellText(27, 4, note.specialNote); // 템플릿에 따라 Col 1 또는 4 시도
+            setCellText(19, 1, note.specialNote);
+        }
+
+        // 7. 새벽예배 참석 (월~금)
+        // 템플릿 하단 우측에 "새벽예배" 영역: 월.화.수.목.금 참석 표시
+        if (note && note.dawnPrayerDays && note.dawnPrayerDays.length > 0) {
+            const dawnDayLabels = ['월', '화', '수', '목', '금'];
+            const attendedDays = dawnDayLabels
+                .filter(day => note.dawnPrayerDays.includes(day))
+                .join('. ');
+            const dawnText = `${attendedDays}\n(${note.dawnPrayerDays.length}회 참석)`;
+            setCellText(20, 9, dawnText);
         }
 
         // --- 데이터 채우기 종료 ---

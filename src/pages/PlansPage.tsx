@@ -40,7 +40,7 @@ const PlansPage: React.FC = () => {
         const newDays = existing.includes(day)
             ? existing.filter(d => d !== day)
             : [...existing, day].sort((a, b) => {
-                const order = ['화', '수', '목', '금'];
+                const order = ['월', '화', '수', '목', '금'];
                 return order.indexOf(a) - order.indexOf(b);
             });
 
@@ -101,13 +101,13 @@ const PlansPage: React.FC = () => {
                 {/* Dawn Prayer */}
                 <div className="mb-10 p-5 bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/20">
                     <div className="flex items-center justify-between mb-4">
-                        <label className="text-sm font-bold text-indigo-900 dark:text-indigo-400 ml-1">새벽예배 참석 현황 (화-금)</label>
+                        <label className="text-sm font-bold text-indigo-900 dark:text-indigo-400 ml-1">새벽예배 참석 현황 (월-금)</label>
                         <span className="text-xs font-bold text-indigo-600 bg-card px-3 py-1.5 rounded-full shadow-sm border border-indigo-100 dark:border-indigo-900/40">
                             이번 주 {currentNote.dawnPrayerDays.length}회
                         </span>
                     </div>
                     <div className="flex gap-2.5">
-                        {['화', '수', '목', '금'].map((day) => (
+                        {['월', '화', '수', '목', '금'].map((day) => (
                             <button
                                 key={day}
                                 onClick={() => toggleDawnPrayer(day)}

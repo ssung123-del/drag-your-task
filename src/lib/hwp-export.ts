@@ -77,8 +77,6 @@ export const copyToHWPClipboard = async (
     });
 
     // 계획 데이터 매핑
-    const planLabels = ["주일", "월", "화", "수", "목", "금", "토", "비고"];
-
     TIME_SLOTS.forEach((time, idx) => {
         html += `<tr style="height: 35px;">`;
         // 시간 열

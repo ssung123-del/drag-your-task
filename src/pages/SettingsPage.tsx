@@ -53,14 +53,14 @@ const SettingsPage: React.FC = () => {
 
     return (
         <div className="p-4 space-y-8 max-w-2xl mx-auto pb-24">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 flex items-center gap-2">
+            <h2 className="text-2xl font-bold mb-6 text-text flex items-center gap-2">
                 ⚙️ 설정 및 관리
             </h2>
 
-            <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-100 border border-gray-100/50 space-y-6">
+            <div className="bg-card p-6 rounded-3xl shadow-xl border border-border space-y-6">
                 <div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-2">백업 및 데이터 보호</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed font-medium">
+                    <h3 className="text-lg font-bold text-text mb-2">백업 및 데이터 보호</h3>
+                    <p className="text-sm text-text-secondary leading-relaxed font-medium">
                         기기를 변경하거나 데이터 유실을 방지하기 위해 정기적으로 백업하세요. 모든 데이터는 브라우저에 보안 저장됩니다.
                     </p>
                 </div>
@@ -76,7 +76,7 @@ const SettingsPage: React.FC = () => {
 
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        className="w-full bg-background hover:bg-border text-text-secondary py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 active:scale-95 transition-all"
                     >
                         <Upload size={20} />
                         백업 불러오기
@@ -91,8 +91,8 @@ const SettingsPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-red-50 p-6 rounded-3xl shadow-lg shadow-red-100 border border-red-100 space-y-4">
-                <div className="flex items-center gap-2 text-red-700">
+            <div className="bg-red-500/10 p-6 rounded-3xl shadow-lg border border-red-500/20 space-y-4">
+                <div className="flex items-center gap-2 text-red-500 font-bold">
                     <AlertTriangle size={24} strokeWidth={2.5} />
                     <h3 className="text-lg font-bold">위험 구역</h3>
                 </div>
@@ -101,7 +101,7 @@ const SettingsPage: React.FC = () => {
                 </p>
                 <button
                     onClick={handleReset}
-                    className="w-full bg-white text-red-600 border border-red-200 hover:bg-red-50 py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
+                    className="w-full bg-card text-red-500 border border-red-500/20 hover:bg-red-500/10 py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
                 >
                     <RotateCcw size={20} />
                     모든 데이터 초기화
@@ -109,8 +109,8 @@ const SettingsPage: React.FC = () => {
             </div>
 
             <div className="text-center space-y-1 py-8">
-                <p className="text-sm font-bold text-gray-400 tracking-wide">DESIGNED FOR 오륜교회</p>
-                <p className="text-xs font-semibold text-gray-300 tracking-wider uppercase">Ministry Secretary v1.2.0 PRO MAX</p>
+                <p className="text-sm font-bold text-text-secondary/50 tracking-wide">DESIGNED FOR 오륜교회</p>
+                <p className="text-xs font-semibold text-text-secondary/30 tracking-wider uppercase">Ministry Secretary v1.2.0 PRO MAX</p>
             </div>
         </div>
     );

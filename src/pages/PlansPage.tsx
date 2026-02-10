@@ -53,7 +53,7 @@ const PlansPage: React.FC = () => {
 
     return (
         <div className="p-4 space-y-8 max-w-2xl mx-auto pb-24">
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2 py-4">
+            <h2 className="text-3xl font-extrabold text-text tracking-tight flex items-center gap-2 py-4">
                 📅 계획 및 메모
             </h2>
 
@@ -63,10 +63,10 @@ const PlansPage: React.FC = () => {
             />
 
             {/* Next Week Plans Section */}
-            <div className="bg-white p-8 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100">
+            <div className="bg-card p-8 rounded-3xl shadow-xl border border-border">
                 <div className="mb-6 space-y-1">
-                    <h3 className="text-xl font-bold text-gray-900">다음 주간 계획</h3>
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <h3 className="text-xl font-bold text-text">다음 주간 계획</h3>
+                    <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
                         REPORT | Next Week Strategy
                     </p>
                 </div>
@@ -74,14 +74,14 @@ const PlansPage: React.FC = () => {
                 <div className="space-y-5">
                     {PLAN_LABELS.map((label, idx) => (
                         <div key={idx} className="space-y-1.5 group">
-                            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 transition-colors group-focus-within:text-indigo-600">
+                            <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-widest ml-1 transition-colors group-focus-within:text-indigo-600">
                                 {label}
                             </label>
                             <input
                                 type="text"
                                 value={currentPlan.plans[idx] || ''}
                                 onChange={(e) => handlePlanChange(idx, e.target.value)}
-                                className="w-full px-5 py-3.5 bg-gray-50 border border-transparent rounded-2xl text-gray-900 font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                className="w-full px-5 py-3.5 bg-background border border-transparent rounded-2xl text-text font-medium focus:bg-card focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all placeholder:text-text-secondary/50 shadow-sm"
                                 placeholder={`계획 입력...`}
                             />
                         </div>
@@ -90,19 +90,19 @@ const PlansPage: React.FC = () => {
             </div>
 
             {/* Special Notes & Dawn Prayer */}
-            <div className="bg-white p-8 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100">
+            <div className="bg-card p-8 rounded-3xl shadow-xl border border-border">
                 <div className="mb-8 space-y-1">
-                    <h3 className="text-xl font-bold text-gray-900">특이사항 및 새벽예배</h3>
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <h3 className="text-xl font-bold text-text">특이사항 및 새벽예배</h3>
+                    <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
                         SPIRITUAL | Weekly Focus
                     </p>
                 </div>
 
                 {/* Dawn Prayer */}
-                <div className="mb-10 p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
+                <div className="mb-10 p-5 bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/20">
                     <div className="flex items-center justify-between mb-4">
-                        <label className="text-sm font-bold text-indigo-900 ml-1">새벽예배 참석 현황 (월-금)</label>
-                        <span className="text-xs font-bold text-indigo-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-indigo-100">
+                        <label className="text-sm font-bold text-indigo-900 dark:text-indigo-400 ml-1">새벽예배 참석 현황 (월-금)</label>
+                        <span className="text-xs font-bold text-indigo-600 bg-card px-3 py-1.5 rounded-full shadow-sm border border-indigo-100 dark:border-indigo-900/40">
                             이번 주 {currentNote.dawnPrayerDays.length}회
                         </span>
                     </div>
@@ -113,7 +113,7 @@ const PlansPage: React.FC = () => {
                                 onClick={() => toggleDawnPrayer(day)}
                                 className={`flex-1 h-14 rounded-2xl font-black text-base flex items-center justify-center transition-all active:scale-90 ${currentNote.dawnPrayerDays.includes(day)
                                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                                    : 'bg-white text-gray-400 hover:bg-gray-100 border border-indigo-100/50 shadow-sm'
+                                    : 'bg-card text-text-secondary hover:bg-background border border-border shadow-sm'
                                     }`}
                             >
                                 {day}
@@ -124,13 +124,13 @@ const PlansPage: React.FC = () => {
 
                 {/* Special Note */}
                 <div className="space-y-2 group">
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 transition-colors group-focus-within:text-indigo-600">
+                    <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-widest ml-1 transition-colors group-focus-within:text-indigo-600">
                         주의사항 / 기도제목 / 비고
                     </label>
                     <textarea
                         value={currentNote.specialNote}
                         onChange={(e) => handleNoteChange(e.target.value)}
-                        className="w-full px-5 py-4 bg-gray-50 border border-transparent rounded-2xl text-gray-900 font-medium h-40 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none resize-none transition-all placeholder:text-gray-300 shadow-sm"
+                        className="w-full px-5 py-4 bg-background border border-transparent rounded-2xl text-text font-medium h-40 focus:bg-card focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none resize-none transition-all placeholder:text-text-secondary/50 shadow-sm"
                         placeholder="이번 주의 특별한 사역 사항이나 기록할 메모를 입력하세요..."
                     />
                 </div>

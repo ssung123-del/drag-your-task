@@ -89,8 +89,8 @@ const EntryForm: React.FC = () => {
     };
     return (
 
-        <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100/50">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 flex items-center gap-2">
+        <div className="bg-card p-6 rounded-3xl shadow-xl border border-border">
+            <h2 className="text-2xl font-bold mb-6 text-text flex items-center gap-2">
                 ✏️ 사역 기록
             </h2>
 
@@ -98,19 +98,19 @@ const EntryForm: React.FC = () => {
                 {/* Date & Time Row */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-gray-700 ml-1">날짜</label>
+                        <label className="block text-sm font-semibold text-text-secondary ml-1">날짜</label>
                         <input
                             type="date"
                             {...register('date')}
-                            className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-gray-900 font-medium focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                            className="w-full px-4 py-3 bg-background rounded-2xl text-text font-medium focus:bg-card focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-gray-700 ml-1">시간</label>
+                        <label className="block text-sm font-semibold text-text-secondary ml-1">시간</label>
                         <div className="relative">
                             <select
                                 {...register('time')}
-                                className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-gray-900 font-medium appearance-none focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                                className="w-full px-4 py-3 bg-background rounded-2xl text-text font-medium appearance-none focus:bg-card focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                             >
                                 {TIME_SLOTS.map(t => (
                                     <option key={t} value={t}>{t}</option>
@@ -123,8 +123,8 @@ const EntryForm: React.FC = () => {
 
                 {/* Category Buttons (Segmented Control) */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 ml-1">카테고리</label>
-                    <div className="flex bg-gray-100 p-1.5 rounded-2xl">
+                    <label className="block text-sm font-semibold text-text-secondary ml-1">카테고리</label>
+                    <div className="flex bg-background p-1.5 rounded-2xl">
                         {CATEGORIES.map(cat => (
                             <button
                                 key={cat}
@@ -136,8 +136,8 @@ const EntryForm: React.FC = () => {
                                 className={clsx(
                                     "flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200",
                                     selectedCategory === cat
-                                        ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                                        : "text-gray-500 hover:text-gray-700"
+                                        ? "bg-card text-text shadow-sm ring-1 ring-black/5"
+                                        : "text-text-secondary hover:text-text"
                                 )}
                             >
                                 {cat}
@@ -148,10 +148,10 @@ const EntryForm: React.FC = () => {
 
                 {/* SubType Select */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 ml-1">세부 유형</label>
+                    <label className="block text-sm font-semibold text-text-secondary ml-1">세부 유형</label>
                     <select
                         {...register('subType')}
-                        className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-gray-900 font-medium appearance-none focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                        className="w-full px-4 py-3 bg-background rounded-2xl text-text font-medium appearance-none focus:bg-card focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                     >
                         {SUB_TYPES[selectedCategory].map(st => (
                             <option key={st} value={st}>{st}</option>
@@ -161,10 +161,10 @@ const EntryForm: React.FC = () => {
 
                 {/* Content */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 ml-1">내용</label>
+                    <label className="block text-sm font-semibold text-text-secondary ml-1">내용</label>
                     <textarea
                         {...register('content', { required: true })}
-                        className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-gray-900 h-32 focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none resize-none transition-all placeholder:text-gray-400"
+                        className="w-full px-4 py-3 bg-background rounded-2xl text-text h-32 focus:bg-card focus:ring-2 focus:ring-primary focus:outline-none resize-none transition-all placeholder:text-text-secondary/50"
                         placeholder="사역 내용을 입력하세요..."
                     />
                 </div>
@@ -176,8 +176,8 @@ const EntryForm: React.FC = () => {
                     className={clsx(
                         "w-full flex items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200 cursor-pointer group",
                         watch('isHighlight')
-                            ? "bg-yellow-50 border-yellow-400 text-yellow-800 shadow-sm"
-                            : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300"
+                            ? "bg-yellow-500/10 border-yellow-400/50 text-yellow-600 shadow-sm"
+                            : "bg-card border-border text-text-secondary hover:bg-background hover:border-border"
                     )}
                 >
                     <Star

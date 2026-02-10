@@ -53,25 +53,25 @@ const ExportPage: React.FC = () => {
     return (
         <div className="p-4 space-y-8 max-w-2xl mx-auto pb-24 font-sans leading-relaxed">
             <header className="space-y-2 py-4">
-                <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                <h2 className="text-3xl font-extrabold text-text tracking-tight flex items-center gap-3">
                     📤 데이터 내보내기
                 </h2>
-                <p className="text-gray-500 text-sm font-medium">
+                <p className="text-text-secondary text-sm font-medium">
                     작성한 사역 기록을 엑셀 파일로 변환하여 다운로드합니다.
                 </p>
             </header>
 
-            <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+            <div className="bg-card rounded-3xl shadow-xl border border-border overflow-hidden">
                 <div className="p-8 space-y-8">
                     {/* 정보 안내 카드 */}
-                    <div className="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100/50 space-y-4">
+                    <div className="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-900/20 space-y-4">
                         <div className="flex items-start gap-4">
                             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-200">
                                 <Info size={20} />
                             </div>
                             <div className="space-y-1">
-                                <h3 className="font-bold text-indigo-900">내보내기 정보</h3>
-                                <p className="text-sm text-indigo-700/80 leading-relaxed">
+                                <h3 className="font-bold text-indigo-900 dark:text-indigo-400">내보내기 정보</h3>
+                                <p className="text-sm text-indigo-700/80 dark:text-indigo-300/80 leading-relaxed">
                                     설정된 사역자 성함(<span className="font-bold">{profile?.name || user?.displayName || '미지정'}</span>)으로
                                     주간 사역 보고서가 작성됩니다.
                                 </p>
@@ -79,20 +79,20 @@ const ExportPage: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 pt-2">
-                            <div className="bg-white/80 p-3 rounded-xl border border-indigo-100/30">
+                            <div className="bg-card/50 p-3 rounded-xl border border-indigo-100/30">
                                 <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mb-1">총 기록수</p>
-                                <p className="text-lg font-black text-indigo-900">{entries.length}건</p>
+                                <p className="text-lg font-black text-indigo-900 dark:text-indigo-400">{entries.length}건</p>
                             </div>
-                            <div className="bg-white/80 p-3 rounded-xl border border-indigo-100/30">
+                            <div className="bg-card/50 p-3 rounded-xl border border-indigo-100/30">
                                 <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mb-1">선택 주차</p>
-                                <p className="text-lg font-black text-indigo-900">{format(currentWeekStart, 'M월 d일')}</p>
+                                <p className="text-lg font-black text-indigo-900 dark:text-indigo-400">{format(currentWeekStart, 'M월 d일')}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* 주차 선택기 */}
                     <div className="space-y-3">
-                        <label className="text-sm font-bold text-gray-700 ml-1">대상 주차 선택</label>
+                        <label className="text-sm font-bold text-text-secondary ml-1">대상 주차 선택</label>
                         <WeekSelector
                             currentWeekStart={currentWeekStart}
                             onWeekChange={setCurrentWeekStart}
@@ -100,30 +100,30 @@ const ExportPage: React.FC = () => {
                     </div>
 
                     {/* 정보 확인 섹션 */}
-                    <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-4">
+                    <div className="bg-background p-6 rounded-2xl border border-border space-y-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <User size={18} className="text-gray-400" />
-                            <span className="font-bold text-gray-700">사역자 정보 확인</span>
+                            <User size={18} className="text-text-secondary" />
+                            <span className="font-bold text-text">사역자 정보 확인</span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">이름</label>
+                                <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">이름</label>
                                 <input
                                     type="text"
                                     value={profile?.name || user?.displayName || ''}
                                     onChange={(e) => updateProfile({ ...(profile || { department: '', churchName: '오륜교회' }), name: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                                    className="w-full px-4 py-3 bg-card border border-border rounded-xl text-sm text-text focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder:text-text-secondary/50"
                                     placeholder="성함 입력"
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">부서</label>
+                                <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">부서</label>
                                 <input
                                     type="text"
                                     value={profile?.department || ''}
                                     onChange={(e) => updateProfile({ ...(profile || { name: user?.displayName || '', churchName: '오륜교회' }), department: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                                    className="w-full px-4 py-3 bg-card border border-border rounded-xl text-sm text-text focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder:text-text-secondary/50"
                                     placeholder="부서 입력"
                                 />
                             </div>
@@ -139,7 +139,7 @@ const ExportPage: React.FC = () => {
                         Excel 보고서 다운로드
                     </button>
 
-                    <p className="text-center text-xs text-gray-400 font-medium">
+                    <p className="text-center text-xs text-text-secondary font-medium">
                         * "교역자 주간 사역일지" 엑셀 파일로 저장됩니다.<br />
                         * 입력하신 정보는 클라우드에 자동으로 안전하게 저장됩니다.
                     </p>

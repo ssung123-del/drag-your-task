@@ -1,25 +1,43 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --color-primary: #007AFF;
-  /* iOS Blue */
   --color-accent: #5AC8FA;
-  /* iOS Light Blue */
   --color-success: #34C759;
-  /* iOS Green */
   --color-danger: #FF3B30;
-  /* iOS Red */
   --color-warning: #FFCC00;
-  /* iOS Yellow */
+
   --color-background: #F2F2F7;
-  /* iOS System Gray 6 */
   --color-card: #FFFFFF;
   --color-text: #1C1C1E;
-  /* iOS Label Color */
   --color-text-secondary: #8E8E93;
-  /* iOS Secondary Label Color */
+  --color-border: rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #000000;
+    --color-card: #1C1C1E;
+    --color-text: #FFFFFF;
+    --color-text-secondary: #8E8E93;
+    --color-border: rgba(255, 255, 255, 0.1);
+  }
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-accent: var(--color-accent);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+  --color-background: var(--color-background);
+  --color-card: var(--color-card);
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-border: var(--color-border);
   --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
+
 
 /* ────────────────────────────────────────────────────
    Base Styles

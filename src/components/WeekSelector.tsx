@@ -21,21 +21,21 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({ currentWeekStart, onWeekCha
     const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 0 });
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg shadow-gray-100 border border-gray-100/50 p-4 flex items-center justify-between">
+        <div className="bg-card rounded-2xl shadow-lg border border-border p-4 flex items-center justify-between">
             <button
                 onClick={handlePrev}
-                className="p-2.5 hover:bg-gray-100 rounded-xl transition-all active:scale-90"
+                className="p-2.5 hover:bg-background rounded-xl transition-all active:scale-90"
             >
-                <ChevronLeft size={20} className="text-gray-600" />
+                <ChevronLeft size={20} className="text-text-secondary" />
             </button>
 
             <div className="flex flex-col items-center">
-                <span className="font-bold text-lg text-gray-900">
+                <span className="font-bold text-lg text-text">
                     {format(currentWeekStart, 'M월 d일', { locale: ko })} ~ {format(weekEnd, 'd일', { locale: ko })}
                 </span>
                 <button
                     onClick={handleToday}
-                    className="text-xs text-[#007AFF] mt-1 flex items-center gap-1 font-bold hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-all"
+                    className="text-xs text-[#007AFF] mt-1 flex items-center gap-1 font-bold hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2.5 py-1 rounded-lg transition-all"
                 >
                     <Calendar size={12} />
                     이번 주로 이동
@@ -44,9 +44,9 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({ currentWeekStart, onWeekCha
 
             <button
                 onClick={handleNext}
-                className="p-2.5 hover:bg-gray-100 rounded-xl transition-all active:scale-90"
+                className="p-2.5 hover:bg-background rounded-xl transition-all active:scale-90"
             >
-                <ChevronRight size={20} className="text-gray-600" />
+                <ChevronRight size={20} className="text-text-secondary" />
             </button>
         </div>
     );

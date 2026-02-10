@@ -112,14 +112,14 @@ const DroppableTimeSlot: React.FC<{
             onClick={() => onQuickAdd(time)}
             className={clsx(
                 "flex items-stretch gap-3 min-h-[64px] rounded-2xl transition-all duration-200 group cursor-pointer",
-                isOver ? "bg-indigo-50 ring-2 ring-indigo-300 ring-offset-2 scale-[1.01]" : "hover:bg-gray-50/80 active:bg-gray-100"
+                isOver ? "bg-indigo-50 dark:bg-indigo-900/20 ring-2 ring-indigo-300 ring-offset-2 scale-[1.01]" : "hover:bg-background/80 active:bg-background"
             )}
         >
             {/* 시간 라벨 */}
-            <div className="w-16 md:w-20 shrink-0 flex items-center justify-center border-r border-gray-50">
+            <div className="w-16 md:w-20 shrink-0 flex items-center justify-center border-r border-border">
                 <span className={clsx(
                     "text-xs md:text-sm font-bold tabular-nums transition-colors",
-                    isMealTime ? "text-orange-500" : (isOver ? "text-indigo-600" : "text-gray-400")
+                    isMealTime ? "text-orange-500" : (isOver ? "text-indigo-600" : "text-text-secondary")
                 )}>
                     {getTimeLabel(time)}
                 </span>
@@ -132,8 +132,8 @@ const DroppableTimeSlot: React.FC<{
             )}>
                 {entries.length === 0 && !isOver && (
                     <div className="w-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-300">
-                            <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-text-secondary/50">
+                            <div className="w-5 h-5 rounded-full bg-background flex items-center justify-center">
                                 <span className="text-sm">+</span>
                             </div>
                             기록 추가
@@ -164,7 +164,7 @@ const DroppableTimeSlot: React.FC<{
                                 e.stopPropagation();
                                 onDelete(entry.id);
                             }}
-                            className="ml-1 p-1.5 rounded-full bg-white/80 text-red-500 shadow-sm transition-all md:opacity-0 md:group-hover/item:opacity-100 hover:bg-red-500 hover:text-white active:scale-75 shrink-0 border border-red-100/50"
+                            className="ml-1 p-1.5 rounded-full bg-card/80 text-red-500 shadow-sm transition-all md:opacity-0 md:group-hover/item:opacity-100 hover:bg-red-500 hover:text-white active:scale-75 shrink-0 border border-red-100/50"
                         >
                             <X size={12} strokeWidth={3} />
                         </button>
@@ -192,18 +192,18 @@ const DetailModal: React.FC<{
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-5 animate-slide-up">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-card rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-5 animate-slide-up border border-border">
                 {/* 헤더 */}
                 <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-gray-900">📝 사역 내용 입력</h3>
-                    <button onClick={onCancel} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                        <X size={20} className="text-gray-400" />
+                    <h3 className="text-xl font-bold text-text">📝 사역 내용 입력</h3>
+                    <button onClick={onCancel} className="p-2 rounded-full hover:bg-background transition-colors">
+                        <X size={20} className="text-text-secondary" />
                     </button>
                 </div>
 
                 {/* 드롭 정보 요약 */}
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
+                <div className="flex items-center gap-3 p-4 bg-background rounded-2xl">
                     <div className={clsx("p-2.5 rounded-xl text-white", block.color)}>
                         {block.icon}
                     </div>
@@ -221,8 +221,8 @@ const DetailModal: React.FC<{
 
                 {/* 세부 유형 선택 (세그먼티드 컨트롤) */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 ml-1">세부 유형</label>
-                    <div className="flex bg-gray-100 p-1.5 rounded-2xl">
+                    <label className="block text-sm font-semibold text-text-secondary ml-1">세부 유형</label>
+                    <div className="flex bg-background p-1.5 rounded-2xl">
                         {block.subTypes.map(({ value, label }) => (
                             <button
                                 key={value}
@@ -242,11 +242,11 @@ const DetailModal: React.FC<{
 
                 {/* 내용 입력 */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 ml-1">사역 내용</label>
+                    <label className="block text-sm font-semibold text-text-secondary ml-1">사역 내용</label>
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-gray-900 font-medium h-28 focus:bg-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none transition-all placeholder:text-gray-400"
+                        className="w-full px-4 py-3 bg-background rounded-2xl text-text font-medium h-28 focus:bg-card focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none transition-all placeholder:text-text-secondary/50"
                         placeholder="사역 내용을 자유롭게 입력하세요..."
                         autoFocus
                     />
@@ -257,7 +257,7 @@ const DetailModal: React.FC<{
                 <div className="flex gap-3 pt-1">
                     <button
                         onClick={onCancel}
-                        className="flex-1 py-3.5 rounded-2xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all"
+                        className="flex-1 py-3.5 rounded-2xl font-bold text-text-secondary bg-background hover:bg-border transition-all active:scale-95"
                     >
                         취소
                     </button>
@@ -356,14 +356,14 @@ const DragDropBoard: React.FC = () => {
             <div className="space-y-6">
                 {/* 헤더: 타이틀 + 날짜 선택 */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">✏️ 사역 기록</h2>
-                    <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
-                        <label className="text-xs font-bold text-gray-400 uppercase">DATE</label>
+                    <h2 className="text-3xl font-extrabold text-text tracking-tight">✏️ 사역 기록</h2>
+                    <div className="flex items-center gap-3 bg-card px-4 py-2 rounded-2xl shadow-sm border border-border">
+                        <label className="text-xs font-bold text-text-secondary uppercase">DATE</label>
                         <input
                             type="date"
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
-                            className="bg-transparent text-gray-900 font-bold focus:outline-none"
+                            className="bg-transparent text-text font-bold focus:outline-none"
                         />
                     </div>
                 </div>
@@ -380,15 +380,15 @@ const DragDropBoard: React.FC = () => {
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* ─── 사역 블록 팔레트 ─── */}
                     <div className="lg:w-56 shrink-0 z-40 sticky top-[68px] lg:top-24 self-start">
-                        <div className="bg-white/90 backdrop-blur-md rounded-[32px] shadow-2xl shadow-gray-200/40 border border-gray-100 p-5 lg:p-6">
+                        <div className="bg-card/90 backdrop-blur-md rounded-[32px] shadow-2xl border border-border p-5 lg:p-6">
                             <div className="flex lg:flex-col gap-2.5">
                                 {MINISTRY_BLOCKS.map(block => (
                                     <DraggableBlock key={block.id} block={block} />
                                 ))}
                             </div>
 
-                            <div className="mt-6 pt-5 border-t border-gray-50 hidden lg:block">
-                                <p className="text-[11px] text-gray-400 text-center font-bold leading-relaxed opacity-80 uppercase tracking-wider">
+                            <div className="mt-6 pt-5 border-t border-border hidden lg:block">
+                                <p className="text-[11px] text-text-secondary text-center font-bold leading-relaxed opacity-80 uppercase tracking-wider">
                                     Drag & Drop<br />to Timeline
                                 </p>
                             </div>
@@ -397,13 +397,13 @@ const DragDropBoard: React.FC = () => {
 
                     {/* ─── 타임라인 (드롭 타겟) ─── */}
                     <div className="flex-1 min-w-0">
-                        <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-5 md:p-8">
+                        <div className="bg-card rounded-3xl shadow-xl border border-border p-5 md:p-8">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="space-y-1">
-                                    <h3 className="text-xl font-bold text-gray-900">데일리 타임라인</h3>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">TIMELINE | {format(new Date(selectedDate), 'yyyy-MM-dd')}</p>
+                                    <h3 className="text-xl font-bold text-text">데일리 타임라인</h3>
+                                    <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">TIMELINE | {format(new Date(selectedDate), 'yyyy-MM-dd')}</p>
                                 </div>
-                                <span className="text-xs text-indigo-600 font-bold bg-indigo-50 px-4 py-2 rounded-full border border-indigo-100">
+                                <span className="text-xs text-indigo-600 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 rounded-full border border-indigo-100/50">
                                     {format(new Date(selectedDate), 'M월 d일 (eee)', { locale: ko })}
                                 </span>
                             </div>
@@ -450,10 +450,10 @@ const DragDropBoard: React.FC = () => {
 
             {/* 사역 종류 선택 모달 (퀵 추가 시) */}
             {showQuickModal && pendingDrop && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 space-y-6 animate-slide-up">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-card rounded-3xl shadow-2xl w-full max-w-sm p-8 space-y-6 animate-slide-up border border-border">
                         <div className="text-center space-y-1">
-                            <h3 className="text-2xl font-black text-gray-900">어떤 기록을 할까요?</h3>
+                            <h3 className="text-2xl font-black text-text">어떤 기록을 할까요?</h3>
                             <p className="text-sm font-bold text-indigo-500 uppercase tracking-widest">Selection for {pendingDrop.time}</p>
                         </div>
 
@@ -480,7 +480,7 @@ const DragDropBoard: React.FC = () => {
 
                         <button
                             onClick={() => { setShowQuickModal(false); setPendingDrop(null); }}
-                            className="w-full py-4 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
+                            className="w-full py-4 text-sm font-bold text-text-secondary hover:text-text transition-colors"
                         >
                             창 닫기
                         </button>

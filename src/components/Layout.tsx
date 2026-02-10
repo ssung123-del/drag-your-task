@@ -49,17 +49,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#F2F2F7] flex">
+        <div className="min-h-screen bg-background flex">
             {/* === 사이드바 (태블릿/PC: md 이상에서만 노출) === */}
-            <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-white/80 backdrop-blur-xl border-r border-gray-200/60 p-6 sticky top-0 h-screen">
+            <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-card/80 backdrop-blur-xl border-r border-border p-6 sticky top-0 h-screen">
                 {/* 앱 로고 & 타이틀 */}
                 <div className="flex items-center gap-3 mb-10">
                     <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/30">
                         🎯
                     </div>
                     <div>
-                        <h1 className="text-lg font-bold tracking-tight text-gray-900 leading-tight">드래그 유얼<br />테스크</h1>
-                        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Drag Your Task</span>
+                        <h1 className="text-lg font-bold tracking-tight text-text leading-tight">드래그 유얼<br />테스크</h1>
+                        <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wider">Drag Your Task</span>
                     </div>
                 </div>
 
@@ -75,7 +75,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group",
                                     isActive
                                         ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
-                                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                                        : "text-text-secondary hover:bg-gray-100/10 hover:text-text"
                                 )
                             }
                         >
@@ -104,8 +104,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold text-gray-900 truncate">{user.displayName || "선교 사역자"}</p>
-                                    <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
+                                    <p className="text-sm font-bold text-text truncate">{user.displayName || "선교 사역자"}</p>
+                                    <p className="text-[10px] text-text-secondary truncate">{user.email}</p>
                                 </div>
                             </div>
                             <button
@@ -129,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                                 </svg>
                             </div>
-                            <span className="text-sm font-bold text-gray-600 group-hover:text-indigo-600">Google 로그인</span>
+                            <span className="text-sm font-bold text-text-secondary group-hover:text-indigo-600">Google 로그인</span>
                         </button>
                     )}
                 </div>
@@ -138,8 +138,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* === 메인 콘텐츠 영역 === */}
             <div className="flex-1 flex flex-col min-h-screen max-w-full">
                 {/* 모바일 헤더 (md 미만에서만 노출) */}
-                <header className="md:hidden sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-5 py-4 flex items-center justify-between">
-                    <h1 className="text-xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+                <header className="md:hidden sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border px-5 py-4 flex items-center justify-between">
+                    <h1 className="text-xl font-bold tracking-tight text-text flex items-center gap-2">
                         🎯 드래그 유얼 테스크
                     </h1>
 
@@ -148,7 +148,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         {user ? (
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 bg-gray-50 p-1 pr-3 rounded-full border border-gray-100 active:scale-95 transition-all"
+                                className="flex items-center gap-2 bg-card p-1 pr-3 rounded-full border border-border active:scale-95 transition-all"
                             >
                                 {user.photoURL ? (
                                     <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full shadow-sm" />
@@ -172,9 +172,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </header>
 
                 {/* PC 상단 바 (md 이상, 미니멀) */}
-                <header className="hidden md:flex sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-gray-100 px-8 py-4 items-center justify-between">
+                <header className="hidden md:flex sticky top-0 z-50 bg-card/60 backdrop-blur-xl border-b border-border px-8 py-4 items-center justify-between">
                     <div /> {/* 좌측 빈 공간: 사이드바가 이미 타이틀을 보여줌 */}
-                    <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-text-secondary bg-background px-3 py-1 rounded-full">
                         Drag Your Task
                     </span>
                 </header>
@@ -185,7 +185,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </main>
 
                 {/* 모바일 하단 탭 바 (md 미만에서만 노출) */}
-                <nav className="md:hidden fixed bottom-0 w-full bg-white/90 backdrop-blur-xl border-t border-gray-200/60 flex justify-around pb-safe pt-2 z-50 safe-area-bottom">
+                <nav className="md:hidden fixed bottom-0 w-full bg-card/90 backdrop-blur-xl border-t border-border flex justify-around pb-safe pt-2 z-50 safe-area-bottom">
                     {navItems.map(({ to, icon: Icon, label }) => (
                         <NavLink
                             key={to}
@@ -194,7 +194,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             className={({ isActive }) =>
                                 clsx(
                                     "flex flex-col items-center justify-center w-full py-2 transition-all duration-200 active:scale-90",
-                                    isActive ? "text-indigo-600" : "text-gray-400 hover:text-gray-600"
+                                    isActive ? "text-indigo-600" : "text-text-secondary hover:text-text"
                                 )
                             }
                         >

@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import WeekSelector from '../components/WeekSelector';
 import { useMinistryStore } from '../store/useMinistryStore';
-import { generateExcel } from '../lib/excel-export';
-import { FileSpreadsheet, User, Info } from 'lucide-react';
+import { generateHwpx } from '../lib/hwpx-export';
+import { FileText, User, Info } from 'lucide-react';
 import { format, startOfWeek } from 'date-fns';
 
 const ExportPage: React.FC = () => {
@@ -25,7 +25,7 @@ const ExportPage: React.FC = () => {
 
         const weekStr = format(currentWeekStart, 'yyyy-MM-dd');
 
-        // 해당 주차의 데이터 필터링
+        // 해당 주차의 데이터 필터링 (주일~토)
         const weekEntries = entries.filter((entry) => {
             const entryDate = new Date(entry.date);
             const nextWeekStart = new Date(currentWeekStart);
@@ -37,7 +37,7 @@ const ExportPage: React.FC = () => {
         const currentNote = weeklyNotes.find(n => n.weekStartDate === weekStr);
 
         try {
-            await generateExcel(
+            await generateHwpx(
                 currentWeekStart,
                 weekEntries,
                 currentPlan,
@@ -45,8 +45,8 @@ const ExportPage: React.FC = () => {
                 activeProfile
             );
         } catch (error) {
-            console.error('Excel export failed:', error);
-            alert('엑셀 파일 생성 중 오류가 발생했습니다.');
+            console.error('HWPX export failed:', error);
+            alert('HWPX 파일 생성 중 오류가 발생했습니다. (템플릿 파일이 public 폴더에 있는지 확인해주세요)');
         }
     };
 
@@ -56,10 +56,10 @@ const ExportPage: React.FC = () => {
         <div className="p-4 space-y-8 max-w-2xl mx-auto pb-24 font-sans leading-relaxed">
             <header className="space-y-2 py-4">
                 <h2 className="text-3xl font-extrabold text-text tracking-tight flex items-center gap-3">
-                    📤 데이터 내보내기
+                    📤 보고서 내보내기
                 </h2>
                 <p className="text-text-secondary text-sm font-medium">
-                    작성한 사역 기록을 엑셀 파일로 변환하여 다운로드합니다.
+                    작성한 사역 기록을 오륜교회 양식인 HWPX 파일로 변환하여 다운로드합니다.
                 </p>
             </header>
 
@@ -68,7 +68,7 @@ const ExportPage: React.FC = () => {
                     {/* 정보 안내 카드 */}
                     <div className="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-900/20 space-y-4">
                         <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-200">
+                            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-200">
                                 <Info size={20} />
                             </div>
                             <div className="space-y-1">
@@ -135,15 +135,15 @@ const ExportPage: React.FC = () => {
                     {/* 다운로드 실행 */}
                     <button
                         onClick={handleDownload}
-                        className="w-full bg-[#34C759] hover:bg-[#2DB34E] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4"
+                        className="w-full bg-[#007AFF] hover:bg-[#0062cc] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4"
                     >
-                        <FileSpreadsheet size={24} />
-                        Excel 보고서 다운로드
+                        <FileText size={24} />
+                        HWPX 보고서 다운로드
                     </button>
 
                     <p className="text-center text-xs text-text-secondary font-medium">
-                        * "교역자 주간 사역일지" 엑셀 파일로 저장됩니다.<br />
-                        * 입력하신 정보는 클라우드에 자동으로 안전하게 저장됩니다.
+                        * "교역자 주간 사역일지" 한글(HWPX) 파일로 저장됩니다.<br />
+                        * 오륜교회 정식 양식에 맞춰 자동으로 데이터가 입력됩니다.
                     </p>
                 </div>
             </div>

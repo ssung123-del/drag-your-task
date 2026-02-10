@@ -16,7 +16,7 @@ import { useMinistryStore } from '../store/useMinistryStore';
 import { type Category, type SubType, TIME_SLOTS } from '../types';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { X, Check, GripVertical, Home, Briefcase } from 'lucide-react';
+import { X, Check, GripVertical, Home, Briefcase, Pencil } from 'lucide-react';
 import clsx from 'clsx';
 
 // ─── 타입 정의 ──────────────────────────────────────────────────
@@ -94,8 +94,9 @@ const DroppableTimeSlot: React.FC<{
     time: string;
     entries: { id: string; subType: string; content: string; category: string }[];
     onDelete: (id: string) => void;
+    onEdit: (id: string) => void;
     onQuickAdd: (time: string) => void;
-}> = ({ time, entries, onDelete, onQuickAdd }) => {
+}> = ({ time, entries, onDelete, onEdit, onQuickAdd }) => {
     const { setNodeRef, isOver } = useDroppable({ id: `slot-${time}` });
 
     const getTimeLabel = (t: string) => {
@@ -158,16 +159,27 @@ const DroppableTimeSlot: React.FC<{
                         <span className="shrink-0 opacity-40">{entry.category === '심방' ? '■' : '●'}</span>
                         <span className="text-xs font-bold truncate max-w-[180px]">{entry.content}</span>
 
-                        {/* 삭제 버튼: 모바일에서는 상시 노출, PC에서는 호버 시 노출 */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDelete(entry.id);
-                            }}
-                            className="ml-1 p-1.5 rounded-full bg-card/80 text-red-500 shadow-sm transition-all md:opacity-0 md:group-hover/item:opacity-100 hover:bg-red-500 hover:text-white active:scale-75 shrink-0 border border-red-100/50"
-                        >
-                            <X size={12} strokeWidth={3} />
-                        </button>
+                        {/* 수정/삭제 버튼: 모바일에서는 상시 노출, PC에서는 호버 시 노출 */}
+                        <div className="flex items-center gap-0.5 ml-1 shrink-0">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(entry.id);
+                                }}
+                                className="p-1.5 rounded-full bg-card/80 text-amber-500 shadow-sm transition-all md:opacity-0 md:group-hover/item:opacity-100 hover:bg-amber-500 hover:text-white active:scale-75 border border-amber-100/50"
+                            >
+                                <Pencil size={11} strokeWidth={3} />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(entry.id);
+                                }}
+                                className="p-1.5 rounded-full bg-card/80 text-red-500 shadow-sm transition-all md:opacity-0 md:group-hover/item:opacity-100 hover:bg-red-500 hover:text-white active:scale-75 border border-red-100/50"
+                            >
+                                <X size={12} strokeWidth={3} />
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -274,13 +286,113 @@ const DetailModal: React.FC<{
     );
 };
 
+// ─── 수정 모달: 기존 데이터를 미리 채워 보여주는 편집 전용 모달 ────
+const EditModal: React.FC<{
+    entry: { id: string; category: string; subType: string; content: string; time: string };
+    date: string;
+    onConfirm: (id: string, subType: SubType, content: string) => void;
+    onCancel: () => void;
+}> = ({ entry, date, onConfirm, onCancel }) => {
+    // 카테고리에 맞는 블록 정보를 찾아서 세부 유형 목록 제공
+    const block = MINISTRY_BLOCKS.find(b => b.category === entry.category) || MINISTRY_BLOCKS[0];
+    const [selectedSubType, setSelectedSubType] = useState<SubType>(entry.subType as SubType);
+    const [content, setContent] = useState(entry.content);
+
+    const handleSubmit = () => {
+        onConfirm(entry.id, selectedSubType, content.trim() || `${selectedSubType} 진행`);
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-card rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-5 animate-slide-up border border-border">
+                {/* 헤더 */}
+                <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-text">✏️ 사역 내용 수정</h3>
+                    <button onClick={onCancel} className="p-2 rounded-full hover:bg-background transition-colors">
+                        <X size={20} className="text-text-secondary" />
+                    </button>
+                </div>
+
+                {/* 수정 대상 정보 요약 */}
+                <div className="flex items-center gap-3 p-4 bg-background rounded-2xl">
+                    <div className={clsx("p-2.5 rounded-xl text-white", block.color)}>
+                        {block.icon}
+                    </div>
+                    <div className="text-sm space-y-0.5">
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-900">{block.label}</span>
+                            <span className="text-gray-400">→</span>
+                            <span className="font-bold text-[#007AFF]">{entry.time}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                            {format(new Date(date), 'yyyy년 M월 d일 (eee)', { locale: ko })}
+                        </span>
+                    </div>
+                </div>
+
+                {/* 세부 유형 선택 (세그먼티드 컨트롤) */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-text-secondary ml-1">세부 유형</label>
+                    <div className="flex bg-background p-1.5 rounded-2xl">
+                        {block.subTypes.map(({ value, label }) => (
+                            <button
+                                key={value}
+                                onClick={() => setSelectedSubType(value)}
+                                className={clsx(
+                                    "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all",
+                                    selectedSubType === value
+                                        ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                                        : "text-gray-500 hover:text-gray-700"
+                                )}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 내용 입력 */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-text-secondary ml-1">사역 내용</label>
+                    <textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        className="w-full px-4 py-3 bg-background rounded-2xl text-text font-medium h-28 focus:bg-card focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none transition-all placeholder:text-text-secondary/50"
+                        placeholder="사역 내용을 자유롭게 입력하세요..."
+                        autoFocus
+                    />
+                </div>
+
+                {/* 수정/취소 버튼 */}
+                <div className="flex gap-3 pt-1">
+                    <button
+                        onClick={onCancel}
+                        className="flex-1 py-3.5 rounded-2xl font-bold text-text-secondary bg-background hover:bg-border transition-all active:scale-95"
+                    >
+                        취소
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        className="flex-1 py-3.5 rounded-2xl font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-500/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                        <Check size={18} />
+                        수정 완료
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // ─── 메인 드래그 앤 드롭 보드 ────────────────────────────────────
 const DragDropBoard: React.FC = () => {
-    const { entries, addEntry, deleteEntry } = useMinistryStore();
+    const { entries, addEntry, updateEntry, deleteEntry } = useMinistryStore();
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [activeBlock, setActiveBlock] = useState<BlockItem | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showQuickModal, setShowQuickModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingEntry, setEditingEntry] = useState<{ id: string; category: string; subType: string; content: string; time: string } | null>(null);
     const [pendingDrop, setPendingDrop] = useState<{ block: BlockItem; time: string } | null>(null);
     const [lastSaved, setLastSaved] = useState<string | null>(null);
 
@@ -349,6 +461,29 @@ const DragDropBoard: React.FC = () => {
         if (confirm('이 기록을 삭제하시겠습니까?')) {
             deleteEntry(id);
         }
+    };
+
+    // 수정 버튼 클릭 시: 해당 Entry 데이터를 EditModal에 전달
+    const handleEditEntry = (id: string) => {
+        const entry = todayEntries.find(e => e.id === id);
+        if (!entry) return;
+        setEditingEntry({
+            id: entry.id,
+            category: entry.category,
+            subType: entry.subType,
+            content: entry.content,
+            time: entry.time,
+        });
+        setShowEditModal(true);
+    };
+
+    // 수정 모달에서 확인 시: updateEntry 호출
+    const handleEditConfirm = async (id: string, subType: SubType, content: string) => {
+        await updateEntry(id, { subType, content });
+        setShowEditModal(false);
+        setEditingEntry(null);
+        setLastSaved(format(new Date(), 'HH:mm:ss'));
+        setTimeout(() => setLastSaved(null), 3000);
     };
 
     return (
@@ -425,6 +560,7 @@ const DragDropBoard: React.FC = () => {
                                             time={time}
                                             entries={slotEntries}
                                             onDelete={handleDeleteEntry}
+                                            onEdit={handleEditEntry}
                                             onQuickAdd={handleQuickAdd}
                                         />
                                     );
@@ -496,6 +632,16 @@ const DragDropBoard: React.FC = () => {
                     date={selectedDate}
                     onConfirm={handleConfirm}
                     onCancel={() => { setShowModal(false); setPendingDrop(null); }}
+                />
+            )}
+
+            {/* 수정 모달 */}
+            {showEditModal && editingEntry && (
+                <EditModal
+                    entry={editingEntry}
+                    date={selectedDate}
+                    onConfirm={handleEditConfirm}
+                    onCancel={() => { setShowEditModal(false); setEditingEntry(null); }}
                 />
             )}
         </DndContext>

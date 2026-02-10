@@ -77,14 +77,14 @@ const DraggableBlock: React.FC<{ block: BlockItem }> = ({ block }) => {
             {...listeners}
             {...attributes}
             className={clsx(
-                "flex items-center gap-3 px-6 py-4 rounded-2xl font-bold text-base cursor-grab active:cursor-grabbing transition-all select-none touch-none shadow-lg",
+                "flex items-center gap-2 md:gap-3 px-4 py-2.5 md:px-6 md:py-4 rounded-2xl font-bold transition-all select-none touch-none shadow-lg outline-none",
                 block.color, block.textColor,
                 isDragging ? "opacity-30 scale-95" : "opacity-100 hover:shadow-xl hover:scale-[1.03]"
             )}
         >
-            <GripVertical size={18} className="opacity-60 shrink-0" />
-            {block.icon}
-            <span className="text-lg">{block.label}</span>
+            <GripVertical size={16} className="opacity-40 shrink-0 md:size-18" />
+            <div className="shrink-0 scale-90 md:scale-100">{block.icon}</div>
+            <span className="text-sm md:text-lg whitespace-nowrap">{block.label}</span>
         </div>
     );
 };
@@ -346,14 +346,19 @@ const DragDropBoard: React.FC = () => {
                 {/* PC: 블록(좌측) | 타임라인(우측) */}
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* ─── 사역 블록 팔레트 ─── */}
-                    <div className="lg:w-52 xl:w-56 shrink-0">
-                        <div className="bg-white rounded-3xl shadow-xl shadow-gray-100 border border-gray-100/50 p-5 lg:sticky lg:top-24">
-                            <h3 className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">사역 블록</h3>
-                            <div className="flex lg:flex-col gap-3">
+                    <div className="lg:w-52 xl:w-56 shrink-0 z-40 sticky top-[68px] lg:top-24 self-start">
+                        <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-4 lg:p-5">
+                            <div className="flex items-center justify-between mb-3 lg:mb-4">
+                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">사역 도구함</h3>
+                                <span className="md:hidden text-[10px] text-indigo-500 font-bold bg-indigo-50 px-2 py-0.5 rounded-md">FLOATING</span>
+                            </div>
+
+                            <div className="flex lg:flex-col gap-2.5">
                                 {MINISTRY_BLOCKS.map(block => (
                                     <DraggableBlock key={block.id} block={block} />
                                 ))}
                             </div>
+
                             <p className="text-[10px] text-gray-400 mt-4 text-center font-medium leading-relaxed hidden lg:block">
                                 블록을 끌어서 시간대에<br />놓으면 기록됩니다
                             </p>

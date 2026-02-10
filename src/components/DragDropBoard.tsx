@@ -381,12 +381,7 @@ const DragDropBoard: React.FC = () => {
                     {/* ─── 사역 블록 팔레트 ─── */}
                     <div className="lg:w-56 shrink-0 z-40 sticky top-[68px] lg:top-24 self-start">
                         <div className="bg-white/90 backdrop-blur-md rounded-[32px] shadow-2xl shadow-gray-200/40 border border-gray-100 p-5 lg:p-6">
-                            <div className="flex items-center justify-between mb-4 lg:mb-6 px-1">
-                                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">사역 도구함</h3>
-                                <span className="md:hidden text-[10px] text-indigo-600 font-black bg-indigo-50 px-2 py-1 rounded-lg">FLOATING</span>
-                            </div>
-
-                            <div className="flex flex-row lg:flex-col gap-3 lg:items-center">
+                            <div className="flex lg:flex-col gap-2.5">
                                 {MINISTRY_BLOCKS.map(block => (
                                     <DraggableBlock key={block.id} block={block} />
                                 ))}

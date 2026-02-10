@@ -160,7 +160,7 @@ export const generateExcel = async (
                 const cell = worksheet.getCell(rowIdx, colIdx);
                 // Prefix logic
                 const prefix = entry.category === '심방' ? '■ ' : entry.category === '업무' ? '● ' : '';
-                const text = `${prefix}${entry.content}\n(${entry.subType})`;
+                const text = `${prefix}${entry.content}`;
 
                 // Append if cell already has value
                 cell.value = cell.value ? `${cell.value}\n\n${text}` : text;

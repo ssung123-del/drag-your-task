@@ -156,8 +156,7 @@ const DroppableTimeSlot: React.FC<{
                         )}
                     >
                         <span className="shrink-0 opacity-40">{entry.category === '심방' ? '■' : '●'}</span>
-                        <span className="whitespace-nowrap">{entry.subType}</span>
-                        <span className="text-[10px] opacity-60 font-medium max-w-[120px] truncate">{entry.content}</span>
+                        <span className="text-xs font-bold truncate max-w-[180px]">{entry.content}</span>
 
                         {/* 삭제 버튼: 모바일에서는 상시 노출, PC에서는 호버 시 노출 */}
                         <button

@@ -24,7 +24,7 @@ export const generateExcel = async (
         bottom: { style: 'thin' },
         right: { style: 'thin' }
     };
-    const fontBase = { name: 'Malgun Gothic', size: 10 };
+    const fontBase = { name: 'Malgun Gothic', size: 8 };
     const alignCenter: Partial<ExcelJS.Alignment> = { vertical: 'middle', horizontal: 'center', wrapText: true };
     const alignLeft: Partial<ExcelJS.Alignment> = { vertical: 'middle', horizontal: 'left', wrapText: true };
 
@@ -62,7 +62,7 @@ export const generateExcel = async (
     worksheet.mergeCells('A2:I2');
     const legendCell = worksheet.getCell('A2');
     legendCell.value = ' ■ : 심방   ● : 업무';
-    legendCell.font = { ...fontBase, size: 10 };
+    legendCell.font = { ...fontBase };
     legendCell.alignment = { vertical: 'middle', horizontal: 'left' };
 
     // Info Row (3)
@@ -116,7 +116,7 @@ export const generateExcel = async (
         const timeCell = row.getCell(1);
         timeCell.value = time;
         timeCell.alignment = alignCenter;
-        timeCell.font = { ...fontBase, size: 9 };
+        timeCell.font = { ...fontBase };
         timeCell.border = borderStyle;
         timeCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } }; // Light gray for time
 
@@ -138,7 +138,7 @@ export const generateExcel = async (
         lunchCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
     }
 
-    const dinnerRowIdx = timeRowMap['18:00'];
+    const dinnerRowIdx = timeRowMap['17:00'];
     if (dinnerRowIdx) {
         worksheet.mergeCells(`B${dinnerRowIdx}:H${dinnerRowIdx}`);
         const dinnerCell = worksheet.getCell(`B${dinnerRowIdx}`);
@@ -238,7 +238,7 @@ export const generateExcel = async (
             const count = statsCount[dateStr]?.[type] || 0;
             const cell = row.getCell(2 + d);
             cell.value = `${type}: ${count}회`;
-            cell.font = { ...fontBase, size: 9 };
+            cell.font = { ...fontBase };
             cell.alignment = alignCenter;
             cell.border = borderStyle;
         }

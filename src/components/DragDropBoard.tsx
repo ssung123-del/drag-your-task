@@ -100,11 +100,11 @@ const DroppableTimeSlot: React.FC<{
 
     const getTimeLabel = (t: string) => {
         if (t === '11:40') return '🍚 점심';
-        if (t === '18:00') return '🍽️ 저녁';
+        if (t === '17:00') return '🍽️ 저녁';
         return t;
     };
 
-    const isMealTime = time === '11:40' || time === '18:00';
+    const isMealTime = time === '11:40' || time === '17:00';
 
     return (
         <div

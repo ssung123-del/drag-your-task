@@ -179,7 +179,7 @@ export const generateExcel = async (
         { label: '목', rows: [13, 14] },
         { label: '금', rows: [15, 16] },
         { label: '토', rows: [17, 18] },
-        { label: '비고', rows: [19, 23] },
+        { label: '비고', rows: [19, 24] },
     ];
 
     planMergeMap.forEach((plan, idx) => {
@@ -201,8 +201,8 @@ export const generateExcel = async (
     });
 
 
-    // --- Statistics Rows (24-26) ---
-    const statsStartRow = 24;
+    // --- Statistics Rows (25-27) ---
+    const statsStartRow = 25;
     const statTypes = ['방문', '카페', '전화']; // Removed "심방" suffix for row key
 
     // Sidebar "심방 기록" Merged Cell (A24:A26)
@@ -256,8 +256,8 @@ export const generateExcel = async (
         totalCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF9C4' } }; // Yellow
     });
 
-    // --- Footer: Notes & Dawn Prayer (27-28) ---
-    const footerRowStart = 27;
+    // --- Footer: Notes & Dawn Prayer (28-29) ---
+    const footerRowStart = 28;
 
     // "특이 사항" Label (A27:A28)
     worksheet.mergeCells(`A${footerRowStart}:A${footerRowStart + 1}`);

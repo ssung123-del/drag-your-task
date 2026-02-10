@@ -3,30 +3,36 @@ import React, { useState } from 'react';
 import WeekSelector from '../components/WeekSelector';
 import { useMinistryStore } from '../store/useMinistryStore';
 import { format, startOfWeek } from 'date-fns';
-import { PLAN_LABELS } from '../types';
+import { PLAN_LABELS, type WeeklyPlan, type WeeklyNote } from '../types';
 
 const PlansPage: React.FC = () => {
     const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
     const { weeklyPlans, updateWeeklyPlan, weeklyNotes, updateWeeklyNote } = useMinistryStore();
 
+    const weekStr = format(currentWeekStart, 'yyyy-MM-dd');
+
     const currentPlan = weeklyPlans.find(
-        (p) => p.weekStartDate === format(currentWeekStart, 'yyyy-MM-dd')
-    ) || { weekStartDate: format(currentWeekStart, 'yyyy-MM-dd'), plans: {} };
+        (p) => p.weekStartDate === weekStr
+    ) || { weekStartDate: weekStr, plans: {} };
 
     const currentNote = weeklyNotes.find(
-        (n) => n.weekStartDate === format(currentWeekStart, 'yyyy-MM-dd')
-    ) || { weekStartDate: format(currentWeekStart, 'yyyy-MM-dd'), specialNote: '', dawnPrayerDays: [] };
+        (n) => n.weekStartDate === weekStr
+    ) || { weekStartDate: weekStr, specialNote: '', dawnPrayerDays: [] };
 
     const handlePlanChange = (idx: number, content: string) => {
-        updateWeeklyPlan(format(currentWeekStart, 'yyyy-MM-dd'), idx, content);
+        const newPlans = { ...currentPlan.plans, [idx]: content };
+        updateWeeklyPlan({
+            weekStartDate: weekStr,
+            plans: newPlans
+        } as WeeklyPlan);
     };
 
     const handleNoteChange = (content: string) => {
-        updateWeeklyNote(
-            format(currentWeekStart, 'yyyy-MM-dd'),
-            content,
-            currentNote.dawnPrayerDays
-        );
+        updateWeeklyNote({
+            ...currentNote,
+            weekStartDate: weekStr,
+            specialNote: content
+        } as WeeklyNote);
     };
 
     const toggleDawnPrayer = (day: string) => {
@@ -38,17 +44,17 @@ const PlansPage: React.FC = () => {
                 return order.indexOf(a) - order.indexOf(b);
             });
 
-        updateWeeklyNote(
-            format(currentWeekStart, 'yyyy-MM-dd'),
-            currentNote.specialNote,
-            newDays
-        );
+        updateWeeklyNote({
+            ...currentNote,
+            weekStartDate: weekStr,
+            dawnPrayerDays: newDays
+        } as WeeklyNote);
     };
 
     return (
         <div className="p-4 space-y-8 max-w-2xl mx-auto pb-24">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 flex items-center gap-2">
-                📅 주간 계획 및 메모
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2 py-4">
+                📅 계획 및 메모
             </h2>
 
             <WeekSelector
@@ -57,24 +63,26 @@ const PlansPage: React.FC = () => {
             />
 
             {/* Next Week Plans Section */}
-            <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-100 border border-gray-100/50">
-                <h3 className="text-lg font-bold mb-4 text-gray-800 flex flex-col gap-1">
-                    다음 주간 계획
-                    <span className="text-xs font-medium text-gray-400">
-                        * 보고서 우측 '다음주간계획' 컬럼 내용입니다.
-                    </span>
-                </h3>
+            <div className="bg-white p-8 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100">
+                <div className="mb-6 space-y-1">
+                    <h3 className="text-xl font-bold text-gray-900">다음 주간 계획</h3>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        REPORT | Next Week Strategy
+                    </p>
+                </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                     {PLAN_LABELS.map((label, idx) => (
-                        <div key={idx} className="space-y-1.5">
-                            <label className="block text-sm font-semibold text-gray-700 ml-1">{label}</label>
+                        <div key={idx} className="space-y-1.5 group">
+                            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 transition-colors group-focus-within:text-indigo-600">
+                                {label}
+                            </label>
                             <input
                                 type="text"
                                 value={currentPlan.plans[idx] || ''}
                                 onChange={(e) => handlePlanChange(idx, e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-gray-900 font-medium focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder:text-gray-400"
-                                placeholder={`${label} 계획을 입력하세요`}
+                                className="w-full px-5 py-3.5 bg-gray-50 border border-transparent rounded-2xl text-gray-900 font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                                placeholder={`계획 입력...`}
                             />
                         </div>
                     ))}
@@ -82,43 +90,48 @@ const PlansPage: React.FC = () => {
             </div>
 
             {/* Special Notes & Dawn Prayer */}
-            <div className="bg-white p-6 rounded-3xl shadow-xl shadow-gray-100 border border-gray-100/50">
-                <h3 className="text-lg font-bold mb-5 text-gray-800">
-                    특이사항 및 새벽예배
-                </h3>
+            <div className="bg-white p-8 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100">
+                <div className="mb-8 space-y-1">
+                    <h3 className="text-xl font-bold text-gray-900">특이사항 및 새벽예배</h3>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        SPIRITUAL | Weekly Focus
+                    </p>
+                </div>
 
                 {/* Dawn Prayer */}
-                <div className="mb-6">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3 ml-1">새벽예배 참석 (월~금)</label>
+                <div className="mb-10 p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
+                    <div className="flex items-center justify-between mb-4">
+                        <label className="text-sm font-bold text-indigo-900 ml-1">새벽예배 참석 현황 (월-금)</label>
+                        <span className="text-xs font-bold text-indigo-600 bg-white px-3 py-1.5 rounded-full shadow-sm border border-indigo-100">
+                            이번 주 {currentNote.dawnPrayerDays.length}회
+                        </span>
+                    </div>
                     <div className="flex gap-2.5">
                         {['월', '화', '수', '목', '금'].map((day) => (
                             <button
                                 key={day}
                                 onClick={() => toggleDawnPrayer(day)}
-                                className={`flex-1 h-12 rounded-2xl font-bold text-base flex items-center justify-center transition-all active:scale-90 ${currentNote.dawnPrayerDays.includes(day)
-                                    ? 'bg-[#007AFF] text-white shadow-lg shadow-blue-500/30'
-                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                className={`flex-1 h-14 rounded-2xl font-black text-base flex items-center justify-center transition-all active:scale-90 ${currentNote.dawnPrayerDays.includes(day)
+                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                                    : 'bg-white text-gray-400 hover:bg-gray-100 border border-indigo-100/50 shadow-sm'
                                     }`}
                             >
                                 {day}
                             </button>
                         ))}
                     </div>
-                    <div className="mt-3 flex justify-end">
-                        <span className="text-sm font-bold text-[#007AFF] bg-blue-50 px-3 py-1 rounded-full">
-                            총 {currentNote.dawnPrayerDays.length}회 참석
-                        </span>
-                    </div>
                 </div>
 
                 {/* Special Note */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 ml-1">특이사항</label>
+                <div className="space-y-2 group">
+                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 transition-colors group-focus-within:text-indigo-600">
+                        주의사항 / 기도제목 / 비고
+                    </label>
                     <textarea
                         value={currentNote.specialNote}
                         onChange={(e) => handleNoteChange(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-gray-900 font-medium h-32 focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none resize-none transition-all placeholder:text-gray-400"
-                        placeholder="이번 주 특별한 사역 사항이나 메모를 입력하세요..."
+                        className="w-full px-5 py-4 bg-gray-50 border border-transparent rounded-2xl text-gray-900 font-medium h-40 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none resize-none transition-all placeholder:text-gray-300 shadow-sm"
+                        placeholder="이번 주의 특별한 사역 사항이나 기록할 메모를 입력하세요..."
                     />
                 </div>
             </div>

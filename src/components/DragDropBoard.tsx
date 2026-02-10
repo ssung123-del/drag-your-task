@@ -94,7 +94,8 @@ const DroppableTimeSlot: React.FC<{
     time: string;
     entries: { id: string; subType: string; content: string; category: string }[];
     onDelete: (id: string) => void;
-}> = ({ time, entries, onDelete }) => {
+    onQuickAdd: (time: string) => void;
+}> = ({ time, entries, onDelete, onQuickAdd }) => {
     const { setNodeRef, isOver } = useDroppable({ id: `slot-${time}` });
 
     const getTimeLabel = (t: string) => {
@@ -103,49 +104,65 @@ const DroppableTimeSlot: React.FC<{
         return t;
     };
 
+    const isMealTime = time === '11:40' || time === '18:00';
+
     return (
         <div
             ref={setNodeRef}
+            onClick={() => onQuickAdd(time)}
             className={clsx(
-                "flex items-stretch gap-3 min-h-[52px] rounded-2xl transition-all duration-200 group",
-                isOver ? "bg-blue-50 ring-2 ring-blue-300 ring-offset-2 scale-[1.01]" : "hover:bg-gray-50/50"
+                "flex items-stretch gap-3 min-h-[64px] rounded-2xl transition-all duration-200 group cursor-pointer",
+                isOver ? "bg-indigo-50 ring-2 ring-indigo-300 ring-offset-2 scale-[1.01]" : "hover:bg-gray-50/80 active:bg-gray-100"
             )}
         >
             {/* 시간 라벨 */}
-            <div className="w-16 md:w-20 shrink-0 flex items-center justify-center">
+            <div className="w-16 md:w-20 shrink-0 flex items-center justify-center border-r border-gray-50">
                 <span className={clsx(
-                    "text-xs md:text-sm font-bold tabular-nums",
-                    time === '11:40' || time === '18:00' ? "text-orange-500" : "text-gray-400"
+                    "text-xs md:text-sm font-bold tabular-nums transition-colors",
+                    isMealTime ? "text-orange-500" : (isOver ? "text-indigo-600" : "text-gray-400")
                 )}>
                     {getTimeLabel(time)}
                 </span>
             </div>
 
-            {/* 드롭 영역 */}
+            {/* 드롭/클릭 영역 */}
             <div className={clsx(
-                "flex-1 flex flex-wrap gap-2 items-center p-2 rounded-xl border-2 border-dashed transition-all min-h-[44px]",
-                isOver ? "border-blue-300 bg-blue-50/50" : "border-transparent group-hover:border-gray-200"
+                "flex-1 flex flex-wrap gap-2 items-center p-3 rounded-xl border-2 border-dashed transition-all min-h-[44px]",
+                isOver ? "border-indigo-300 bg-indigo-50/50" : "border-transparent group-hover:border-gray-200"
             )}>
-                {entries.length === 0 && isOver && (
-                    <span className="text-xs text-blue-400 font-medium animate-pulse">여기에 놓으세요!</span>
+                {entries.length === 0 && !isOver && (
+                    <div className="w-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-300">
+                            <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                                <span className="text-sm">+</span>
+                            </div>
+                            기록 추가
+                        </div>
+                    </div>
                 )}
+
+                {entries.length === 0 && isOver && (
+                    <span className="text-xs text-indigo-400 font-bold animate-pulse">사역 블록 배치 중...</span>
+                )}
+
                 {entries.map((entry) => (
                     <div
                         key={entry.id}
+                        onClick={(e) => e.stopPropagation()} // 삭제 버튼 클릭 시 등록 팝업 안 뜨게 방지
                         className={clsx(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all group/item relative",
-                            entry.category === '심방' ? 'bg-blue-100 text-blue-700' :
-                                'bg-green-100 text-green-700'
+                            "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all group/item relative shadow-sm",
+                            entry.category === '심방' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' :
+                                'bg-emerald-50 text-emerald-700 border border-emerald-100'
                         )}
                     >
-
+                        <span className="shrink-0">{entry.category === '심방' ? '■' : '●'}</span>
                         <span>{entry.subType}</span>
-                        <span className="text-[10px] opacity-60 max-w-[120px] truncate">{entry.content}</span>
+                        <span className="text-[10px] opacity-60 font-medium max-w-[150px] truncate">{entry.content}</span>
                         <button
                             onClick={() => onDelete(entry.id)}
-                            className="ml-1 p-0.5 rounded-full bg-red-100 text-red-500 opacity-0 group-hover/item:opacity-100 hover:bg-red-500 hover:text-white transition-all"
+                            className="ml-1 p-1 rounded-full bg-white/50 text-red-500 opacity-0 group-hover/item:opacity-100 hover:bg-red-500 hover:text-white transition-all shadow-sm"
                         >
-                            <X size={10} />
+                            <X size={10} strokeWidth={3} />
                         </button>
                     </div>
                 ))}
@@ -259,6 +276,7 @@ const DragDropBoard: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [activeBlock, setActiveBlock] = useState<BlockItem | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const [showQuickModal, setShowQuickModal] = useState(false);
     const [pendingDrop, setPendingDrop] = useState<{ block: BlockItem; time: string } | null>(null);
     const [lastSaved, setLastSaved] = useState<string | null>(null);
 
@@ -288,6 +306,19 @@ const DragDropBoard: React.FC = () => {
 
         const time = (over.id as string).replace('slot-', '');
         setPendingDrop({ block: droppedBlock, time });
+        setShowModal(true);
+    };
+
+    // 퀵 추가 핸들러 (슬롯 클릭 시)
+    const handleQuickAdd = (time: string) => {
+        setPendingDrop({ block: MINISTRY_BLOCKS[0], time }); // 기본값 설정 (block-visit)
+        setShowQuickModal(true);
+    };
+
+    const handleSelectCategory = (block: BlockItem) => {
+        if (!pendingDrop) return;
+        setPendingDrop({ ...pendingDrop, block });
+        setShowQuickModal(false);
         setShowModal(true);
     };
 
@@ -321,29 +352,27 @@ const DragDropBoard: React.FC = () => {
             <div className="space-y-6">
                 {/* 헤더: 타이틀 + 날짜 선택 */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <h2 className="text-2xl font-bold text-gray-900">✏️ 사역 기록</h2>
-                    <div className="flex items-center gap-3">
-                        <label className="text-sm font-semibold text-gray-500">날짜</label>
+                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">✏️ 사역 기록</h2>
+                    <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+                        <label className="text-xs font-bold text-gray-400 uppercase">DATE</label>
                         <input
                             type="date"
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
-                            className="px-4 py-2.5 bg-gray-100 rounded-2xl text-gray-900 font-medium focus:bg-white focus:ring-2 focus:ring-[#007AFF] focus:outline-none transition-all"
+                            className="bg-transparent text-gray-900 font-bold focus:outline-none"
                         />
                     </div>
                 </div>
 
                 {/* 저장 성공 메시지 */}
                 {lastSaved && (
-                    <div className="p-4 bg-green-100 text-green-800 rounded-2xl flex items-center justify-center gap-2 animate-fade-in text-base font-bold">
+                    <div className="p-4 bg-emerald-500 text-white rounded-2xl flex items-center justify-center gap-2 animate-fade-in text-base font-bold shadow-lg shadow-emerald-200">
                         <Check size={20} />
-                        저장되었습니다 ({lastSaved})
+                        기록이 저장되었습니다 ({lastSaved})
                     </div>
                 )}
 
                 {/* === 드래그 앤 드롭 레이아웃 === */}
-                {/* 모바일: 블록(상단) → 타임라인(하단) */}
-                {/* PC: 블록(좌측) | 타임라인(우측) */}
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* ─── 사역 블록 팔레트 ─── */}
                     <div className="lg:w-52 xl:w-56 shrink-0 z-40 sticky top-[68px] lg:top-24 self-start">
@@ -367,15 +396,18 @@ const DragDropBoard: React.FC = () => {
 
                     {/* ─── 타임라인 (드롭 타겟) ─── */}
                     <div className="flex-1 min-w-0">
-                        <div className="bg-white rounded-3xl shadow-xl shadow-gray-100 border border-gray-100/50 p-5">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">타임라인</h3>
-                                <span className="text-xs text-gray-400 font-semibold bg-gray-50 px-3 py-1 rounded-full">
+                        <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-5 md:p-8">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="space-y-1">
+                                    <h3 className="text-xl font-bold text-gray-900">데일리 타임라인</h3>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">TIMELINE | {format(new Date(selectedDate), 'yyyy-MM-dd')}</p>
+                                </div>
+                                <span className="text-xs text-indigo-600 font-bold bg-indigo-50 px-4 py-2 rounded-full border border-indigo-100">
                                     {format(new Date(selectedDate), 'M월 d일 (eee)', { locale: ko })}
                                 </span>
                             </div>
 
-                            <div className="space-y-1 divide-y divide-gray-50">
+                            <div className="space-y-1.5 ">
                                 {TIME_SLOTS.map((time) => {
                                     const slotEntries = todayEntries
                                         .filter(e => e.time === time)
@@ -392,6 +424,7 @@ const DragDropBoard: React.FC = () => {
                                             time={time}
                                             entries={slotEntries}
                                             onDelete={handleDeleteEntry}
+                                            onQuickAdd={handleQuickAdd}
                                         />
                                     );
                                 })}
@@ -401,7 +434,7 @@ const DragDropBoard: React.FC = () => {
                 </div>
             </div>
 
-            {/* 드래그 오버레이 (마우스 따라다니는 고스트) */}
+            {/* 드래그 오버레이 */}
             <DragOverlay>
                 {activeBlock && (
                     <div className={clsx(
@@ -413,6 +446,46 @@ const DragDropBoard: React.FC = () => {
                     </div>
                 )}
             </DragOverlay>
+
+            {/* 사역 종류 선택 모달 (퀵 추가 시) */}
+            {showQuickModal && pendingDrop && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 space-y-6 animate-slide-up">
+                        <div className="text-center space-y-1">
+                            <h3 className="text-2xl font-black text-gray-900">어떤 기록을 할까요?</h3>
+                            <p className="text-sm font-bold text-indigo-500 uppercase tracking-widest">Selection for {pendingDrop.time}</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+                            {MINISTRY_BLOCKS.map(block => (
+                                <button
+                                    key={block.id}
+                                    onClick={() => handleSelectCategory(block)}
+                                    className={clsx(
+                                        "flex items-center gap-4 p-5 rounded-2xl transition-all active:scale-95 text-white shadow-lg",
+                                        block.color
+                                    )}
+                                >
+                                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                        {block.icon}
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-lg font-black">{block.label} 기록하기</p>
+                                        <p className="text-[10px] opacity-80 font-bold uppercase tracking-wider">{block.category} Module</p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            onClick={() => { setShowQuickModal(false); setPendingDrop(null); }}
+                            className="w-full py-4 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            창 닫기
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* 상세 내용 입력 모달 */}
             {showModal && pendingDrop && (

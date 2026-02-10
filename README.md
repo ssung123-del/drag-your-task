@@ -1,72 +1,66 @@
 
-# ⛪ 사역 비서 앱 (Ministry Secretary App)
+# 🎯 드래그 유얼 테스크 (Drag Your Task) v1.2
 
-21명의 사역자가 각자의 스마트폰에서 사역 일지를 기록하고, 주간 보고서를 엑셀로 자동 생성하는 웹앱입니다.
-**서버 없이** 동작하며, 데이터는 각자의 핸드폰에 안전하게 저장됩니다.
+> **"사역 기록, 이제는 입력하지 말고 드래그하세요."**  
+> 드래그 유얼 테스크는 교역자분들의 효율적인 사역 기록과 주간 보고서 작성을 돕는 스마트 비서 앱입니다.
 
-## ✨ 주요 기능
-1. **📝 간편 기록**: 언제 어디서나 빠르게 사역 내용 입력 (자동 심방/업무 태깅)
-2. **📊 주간 통계**: 이번 주 심방 현황 한눈에 파악
-3. **📅 주간 계획**: 다음 주 계획 및 특이사항 입력
-4. **📥 엑셀 내보내기**: "교역자 주간 사역일지" HWP 양식과 100% 동일한 엑셀 파일 생성
-5. **🔒 데이터 안전**: 내 폰에만 저장 + 백업 파일 다운로드 지원
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=white)
 
-## 🚀 실행 방법 (로컬 개발)
+---
 
-1. 의존성 설치
-   ```bash
-   npm install
-   ```
+## ✨ 핵심 기능 (Core Features)
 
-2. 개발 서버 실행
-   ```bash
-   npm run dev
-   ```
-   브라우저에서 `http://localhost:5173` 접속
+### 1. 🖱️ 드래그 앤 드롭 사역 기록
+- 복잡한 입력창 대신 **심방**, **업무** 블록을 원하는 시간대에 드래그하여 직관적으로 기록합니다.
+- dnd-kit 기반의 부드러운 애니메이션과 터치 대응을 지원합니다.
 
-## 🌍 배포 방법 (GitHub Pages - 무료)
+### 2. ☁️ Google 클라우드 자동 동기화
+- Firebase 연동을 통해 **Google 로그인** 시 모든 데이터가 서버에 안전하게 저장됩니다.
+- 아이폰에서 기록하고 PC에서 즉시 확인하는 실시간 동기화 환경을 제공합니다.
 
-이 앱을 21명의 사역자가 쓸 수 있게 배포하려면:
+### 3. 📱 멀티 플랫폼 반응형 디자인
+- **데스크톱/태블릿**: 넓은 화면을 활용한 좌측 사이드바 인터페이스.
+- **모바일**: 한 손 조작에 최적화된 하단 탭 바와 카드형 레이아웃.
+- Apple 디자인 가이드를 준수하는 프리미엄 UI/UX.
 
-1. **GitHub 저장소 생성**
-   - GitHub에 새 저장소(Repository)를 만듭니다 (예: `ministry-app`).
+### 4. 📊 스마트 주간 보고서 (Excel)
+- 주간 사역 데이터를 분석하여 정해진 양식의 **Excel 파일**로 즉시 내보내기 가능.
+- 수동 정리가 필요 없는 자동화된 보고 프로세스.
 
-2. **코드 푸시**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   # 원격 저장소 연결 (본인의 주소로 변경)
-   git remote add origin https://github.com/YOUR_ID/ministry-app.git
-   git push -u origin main
-   ```
+---
 
-3. **GitHub Pages 설정**
-   - GitHub 저장소 > **Settings** > **Pages** 이동
-   - Build and deployment > Source를 **GitHub Actions**로 변경? 
-   - **아니요, 더 쉬운 방법**: 
-     - `vite.config.ts`에서 `base: '/ministry-app/'` 설정 추가 (저장소 이름이 ministry-app인 경우)
-     - `npm run build` 실행
-     - `dist` 폴더의 내용을 `gh-pages` 브랜치에 푸시하면 됩니다.
-   
-   **★ 가장 간단한 방법 (자동화 스크립트 사용):**
-   - `package.json`에 `"deploy": "gh-pages -d dist"` 추가
-   - `npm install -D gh-pages`
-   - `npm run build`
-   - `npm run deploy`
+## 🛠 기술 스택 (Tech Stack)
+- **Frontend**: React (Functional Components, Hooks)
+- **State Management**: Zustand (with Persist Middleware)
+- **Styling**: Tailwind CSS
+- **Backend**: Firebase Store (Firestore), Firebase Auth (Google)
+- **Utilities**: Date-fns, Lucide-React, ExcelJS, clsx
 
-4. **URL 공유**
-   - 배포가 완료되면 `https://YOUR_ID.github.io/ministry-app` 주소가 생성됩니다.
-   - 이 주소를 사역자들에게 공유하세요.
+---
 
-## 📱 스마트폰 홈 화면 추가 (앱처럼 쓰기)
-- **아이폰 (Safari)**: 공유 버튼 -> '홈 화면에 추가'
-- **안드로이드 (Chrome)**: 메뉴 버튼 -> '홈 화면에 추가'
+## 🚀 시작하기 (How to Start)
 
-## ⚠️ 데이터 관리 주의사항
-- 데이터는 **각자의 브라우저(localStorage)**에 저장됩니다.
-- 브라우저 캐시를 삭제하거나 기기를 변경하면 데이터가 사라질 수 있습니다.
-- **설정 > 데이터 백업** 기능을 이용해 주기적으로 JSON 파일을 백업하세요.
+### 로컬 실행
+```bash
+npm install
+npm run dev
+```
 
-Made for 오름교회
+### 환경 설정
+- `.lib/firebase.ts` 파일에 자신의 Firebase 설정값을 입력해야 클라우드 기능을 사용할 수 있습니다.
+
+---
+
+## 📋 사역자 가이드
+1. **Google 로그인**: 하단 버튼을 통해 로그인하여 동기화를 시작합니다.
+2. **사역 블록 드래그**: 상단의 블록을 타임라인으로 끌어옵니다.
+3. **상세 내용 입력**: 나타나는 모달에서 세부 유형과 내용을 입력합니다.
+4. **Excel 다운로드**: [내보내기] 탭에서 주간 보고서를 생성합니다.
+
+---
+
+**Designed for Ministry Efficiency**  
+Copyright © 2026 Drag Your Task Team. All rights reserved.

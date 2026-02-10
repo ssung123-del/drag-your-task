@@ -150,19 +150,24 @@ const DroppableTimeSlot: React.FC<{
                         key={entry.id}
                         onClick={(e) => e.stopPropagation()} // 삭제 버튼 클릭 시 등록 팝업 안 뜨게 방지
                         className={clsx(
-                            "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all group/item relative shadow-sm",
-                            entry.category === '심방' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' :
-                                'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                            "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all group/item relative shadow-sm border",
+                            entry.category === '심방' ? 'bg-indigo-50 text-indigo-700 border-indigo-100/50' :
+                                'bg-emerald-50 text-emerald-700 border-emerald-100/50'
                         )}
                     >
-                        <span className="shrink-0">{entry.category === '심방' ? '■' : '●'}</span>
-                        <span>{entry.subType}</span>
-                        <span className="text-[10px] opacity-60 font-medium max-w-[150px] truncate">{entry.content}</span>
+                        <span className="shrink-0 opacity-40">{entry.category === '심방' ? '■' : '●'}</span>
+                        <span className="whitespace-nowrap">{entry.subType}</span>
+                        <span className="text-[10px] opacity-60 font-medium max-w-[120px] truncate">{entry.content}</span>
+
+                        {/* 삭제 버튼: 모바일에서는 상시 노출, PC에서는 호버 시 노출 */}
                         <button
-                            onClick={() => onDelete(entry.id)}
-                            className="ml-1 p-1 rounded-full bg-white/50 text-red-500 opacity-0 group-hover/item:opacity-100 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(entry.id);
+                            }}
+                            className="ml-1 p-1.5 rounded-full bg-white/80 text-red-500 shadow-sm transition-all md:opacity-0 md:group-hover/item:opacity-100 hover:bg-red-500 hover:text-white active:scale-75 shrink-0 border border-red-100/50"
                         >
-                            <X size={10} strokeWidth={3} />
+                            <X size={12} strokeWidth={3} />
                         </button>
                     </div>
                 ))}

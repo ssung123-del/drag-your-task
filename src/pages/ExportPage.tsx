@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import WeekSelector from '../components/WeekSelector';
 import { useMinistryStore } from '../store/useMinistryStore';
 import { generateExcel } from '../lib/excel-export';
-import { FileSpreadsheet, User, Info } from 'lucide-react';
+import { FileSpreadsheet, User, Info, Copy } from 'lucide-react';
+import { copyToHWPClipboard } from '../lib/hwp-export';
 import { format, startOfWeek } from 'date-fns';
 
 const ExportPage: React.FC = () => {
@@ -47,6 +48,48 @@ const ExportPage: React.FC = () => {
         } catch (error) {
             console.error('Excel export failed:', error);
             alert('엑셀 파일 생성 중 오류가 발생했습니다.');
+        }
+    };
+
+    const handleCopyToHWP = async () => {
+        const activeProfile = profile || {
+            name: user?.displayName || '사역자',
+            department: '미지정',
+            churchName: '오륜교회'
+        };
+
+        if (!activeProfile.name || activeProfile.department === '미지정') {
+            alert('설정 페이지에서 사역자 정보를 먼저 입력해주세요.');
+            return;
+        }
+
+        const weekStr = format(currentWeekStart, 'yyyy-MM-dd');
+        const weekEntries = entries.filter((entry) => {
+            const entryDate = new Date(entry.date);
+            const nextWeekStart = new Date(currentWeekStart);
+            nextWeekStart.setDate(currentWeekStart.getDate() + 7);
+            return entryDate >= currentWeekStart && entryDate < nextWeekStart;
+        });
+
+        const currentPlan = weeklyPlans.find(p => p.weekStartDate === weekStr);
+        const currentNote = weeklyNotes.find(n => n.weekStartDate === weekStr);
+
+        try {
+            const success = await copyToHWPClipboard(
+                currentWeekStart,
+                weekEntries,
+                currentPlan,
+                currentNote,
+                activeProfile
+            );
+            if (success) {
+                alert('한글(HWP)용 표가 복사되었습니다! 한글 문서에서 Ctrl+V를 눌러주세요.');
+            } else {
+                alert('복사에 실패했습니다. 브라우저 설정을 확인해주세요.');
+            }
+        } catch (error) {
+            console.error('HWP copy failed:', error);
+            alert('복사 중 오류가 발생했습니다.');
         }
     };
 
@@ -130,14 +173,24 @@ const ExportPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* 다운로드 실행 */}
-                    <button
-                        onClick={handleDownload}
-                        className="w-full bg-[#34C759] hover:bg-[#2DB34E] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4"
-                    >
-                        <FileSpreadsheet size={24} />
-                        Excel 보고서 다운로드
-                    </button>
+                    {/* 다운로드 및 복사 실행 */}
+                    <div className="grid grid-cols-1 gap-3 mt-4">
+                        <button
+                            onClick={handleDownload}
+                            className="w-full bg-[#34C759] hover:bg-[#2DB34E] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-green-500/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+                        >
+                            <FileSpreadsheet size={24} />
+                            Excel 보고서 다운로드
+                        </button>
+
+                        <button
+                            onClick={handleCopyToHWP}
+                            className="w-full bg-[#007AFF] hover:bg-[#0062cc] text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+                        >
+                            <Copy size={24} />
+                            한글(HWP) 표 복사하기
+                        </button>
+                    </div>
 
                     <p className="text-center text-xs text-text-secondary font-medium">
                         * "교역자 주간 사역일지" 엑셀 파일로 저장됩니다.<br />

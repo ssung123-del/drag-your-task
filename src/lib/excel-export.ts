@@ -164,6 +164,7 @@ export const generateExcel = async (
 
                 // Append if cell already has value
                 cell.value = cell.value ? `${cell.value}\n\n${text}` : text;
+                cell.font = fontBase;
                 cell.alignment = { ...alignLeft, wrapText: true };
             }
         }
@@ -270,6 +271,7 @@ export const generateExcel = async (
     worksheet.mergeCells(`B${footerRowStart}:H${footerRowStart + 1}`);
     const noteContent = worksheet.getCell(`B${footerRowStart}`);
     noteContent.value = weeklyNotes?.specialNote || '';
+    noteContent.font = fontBase;
     noteContent.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
     noteContent.border = borderStyle;
 

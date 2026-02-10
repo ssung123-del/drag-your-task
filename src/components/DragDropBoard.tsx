@@ -77,14 +77,14 @@ const DraggableBlock: React.FC<{ block: BlockItem }> = ({ block }) => {
             {...listeners}
             {...attributes}
             className={clsx(
-                "flex items-center gap-2 md:gap-3 px-4 py-2.5 md:px-6 md:py-4 rounded-2xl font-bold transition-all select-none touch-none shadow-lg outline-none",
+                "flex items-center gap-2 md:gap-3 px-4 py-3 md:px-5 md:py-3.5 rounded-2xl font-bold transition-all select-none touch-none shadow-lg outline-none w-full lg:max-w-[180px]",
                 block.color, block.textColor,
                 isDragging ? "opacity-30 scale-95" : "opacity-100 hover:shadow-xl hover:scale-[1.03]"
             )}
         >
-            <GripVertical size={16} className="opacity-40 shrink-0 md:size-18" />
-            <div className="shrink-0 scale-90 md:scale-100">{block.icon}</div>
-            <span className="text-sm md:text-lg whitespace-nowrap">{block.label}</span>
+            <GripVertical size={16} className="opacity-40 shrink-0" />
+            <div className="shrink-0">{block.icon}</div>
+            <span className="text-sm md:text-base whitespace-nowrap">{block.label}</span>
         </div>
     );
 };
@@ -375,22 +375,24 @@ const DragDropBoard: React.FC = () => {
                 {/* === 드래그 앤 드롭 레이아웃 === */}
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* ─── 사역 블록 팔레트 ─── */}
-                    <div className="lg:w-52 xl:w-56 shrink-0 z-40 sticky top-[68px] lg:top-24 self-start">
-                        <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-4 lg:p-5">
-                            <div className="flex items-center justify-between mb-3 lg:mb-4">
-                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">사역 도구함</h3>
-                                <span className="md:hidden text-[10px] text-indigo-500 font-bold bg-indigo-50 px-2 py-0.5 rounded-md">FLOATING</span>
+                    <div className="lg:w-56 shrink-0 z-40 sticky top-[68px] lg:top-24 self-start">
+                        <div className="bg-white/90 backdrop-blur-md rounded-[32px] shadow-2xl shadow-gray-200/40 border border-gray-100 p-5 lg:p-6">
+                            <div className="flex items-center justify-between mb-4 lg:mb-6 px-1">
+                                <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">사역 도구함</h3>
+                                <span className="md:hidden text-[10px] text-indigo-600 font-black bg-indigo-50 px-2 py-1 rounded-lg">FLOATING</span>
                             </div>
 
-                            <div className="flex lg:flex-col gap-2.5">
+                            <div className="flex flex-row lg:flex-col gap-3 lg:items-center">
                                 {MINISTRY_BLOCKS.map(block => (
                                     <DraggableBlock key={block.id} block={block} />
                                 ))}
                             </div>
 
-                            <p className="text-[10px] text-gray-400 mt-4 text-center font-medium leading-relaxed hidden lg:block">
-                                블록을 끌어서 시간대에<br />놓으면 기록됩니다
-                            </p>
+                            <div className="mt-6 pt-5 border-t border-gray-50 hidden lg:block">
+                                <p className="text-[11px] text-gray-400 text-center font-bold leading-relaxed opacity-80 uppercase tracking-wider">
+                                    Drag & Drop<br />to Timeline
+                                </p>
+                            </div>
                         </div>
                     </div>
 

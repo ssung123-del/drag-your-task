@@ -46,3 +46,9 @@ export const TIME_SLOTS = [
 export const DAYS_OF_WEEK_KR = ["주일", "화", "수", "목", "금", "토"];
 export const PLAN_LABELS = ["주일", "화", "수", "목", "금", "토", "비고"];
 
+export interface QuickTask {
+    id: string;
+    content: string;
+    createdAt: string;
+}
+

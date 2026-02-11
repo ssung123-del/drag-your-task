@@ -19,6 +19,7 @@ interface MinistryState {
     entries: MinistryEntry[];
     weeklyPlans: WeeklyPlan[];
     weeklyNotes: WeeklyNote[];
+
     profile: UserProfile | null;
 
     // Actions
@@ -29,6 +30,7 @@ interface MinistryState {
     deleteEntry: (id: string) => Promise<void>;
     updateWeeklyPlan: (plan: WeeklyPlan) => Promise<void>;
     updateWeeklyNote: (note: WeeklyNote) => Promise<void>;
+
     updateProfile: (profile: UserProfile) => Promise<void>;
     clearData: () => void;
 }
@@ -40,6 +42,7 @@ export const useMinistryStore = create<MinistryState>()(
             entries: [],
             weeklyPlans: [],
             weeklyNotes: [],
+
             profile: null,
 
             setUser: (user) => set({ user }),
@@ -114,6 +117,8 @@ export const useMinistryStore = create<MinistryState>()(
                 }
             },
 
+
+
             updateProfile: async (profile) => {
                 set({ profile });
                 const user = get().user;
@@ -130,6 +135,7 @@ export const useMinistryStore = create<MinistryState>()(
                 entries: state.entries,
                 weeklyPlans: state.weeklyPlans,
                 weeklyNotes: state.weeklyNotes,
+
                 profile: state.profile,
             }),
         }

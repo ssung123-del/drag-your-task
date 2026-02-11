@@ -1,5 +1,4 @@
-
-# 🎯 드래그 유얼 테스크 (Drag Your Task) v1.2
+# 🎯 드래그 유얼 테스크 (Drag Your Task) v1.3
 
 > **"사역 기록, 이제는 입력하지 말고 드래그하세요."**  
 > 드래그 유얼 테스크는 교역자분들의 효율적인 사역 기록과 주간 보고서 작성을 돕는 스마트 비서 앱입니다.
@@ -8,6 +7,23 @@
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=white)
+
+---
+
+## 🆕 최신 업데이트 (v1.3 Highlights)
+
+### 1. 🎨 UI/UX 전면 개편
+- **다크 모드 완벽 지원**: 시스템 설정에 따른 눈이 편안한 다크 모드 테마 적용.
+- **디자인 통일성 강화**: 버튼 스타일, 색상 팔레트, 컴포넌트 디자인을 통일하여 더욱 세련된 경험 제공.
+
+### 2. 📝 HWPX 내보내기 기능 강화
+- **정교한 템플릿 매핑**: 기존 한글 서식(HWPX)의 셀 좌표에 데이터를 정확하게 입력합니다.
+- **다중 입력 지원**: 같은 시간대에 여러 사역 일정을 입력해도 누락 없이 모두 기록됩니다.
+- **안정성 확보**: 불안정한 '클립보드 복사' 기능을 제거하고, 파일 직접 다운로드 방식을 채택하여 데이터 손실 위험을 없앴습니다.
+
+### 3. 🛠️ 사용성 개선
+- **수정 기능 추가**: 등록된 사역 블록을 다시 클릭하여 내용을 간편하게 수정할 수 있습니다.
+- **입력 편의성**: 심방/업무 등 카테고리별 입력 필드를 최적화했습니다.
 
 ---
 

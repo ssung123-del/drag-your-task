@@ -26,8 +26,9 @@
 - **모바일**: 한 손 조작에 최적화된 하단 탭 바와 카드형 레이아웃.
 - Apple 디자인 가이드를 준수하는 프리미엄 UI/UX.
 
-### 4. 📊 스마트 주간 보고서 (Excel)
-- 주간 사역 데이터를 분석하여 정해진 양식의 **Excel 파일**로 즉시 내보내기 가능.
+### 4. 📊 스마트 주간 보고서 (Excel & HWPX)
+- 주간 사역 데이터를 분석하여 정해진 양식의 **Excel 및 HWPX 파일**로 즉시 내보내기 가능.
+- **HWPX 템플릿 지원**: 기존 한글(HWP) 서식의 스타일(폰트, 문단 모양)을 그대로 유지하며 데이터를 자동 입력합니다.
 - 수동 정리가 필요 없는 자동화된 보고 프로세스.
 
 ---
@@ -37,7 +38,7 @@
 - **State Management**: Zustand (with Persist Middleware)
 - **Styling**: Tailwind CSS
 - **Backend**: Firebase Store (Firestore), Firebase Auth (Google)
-- **Utilities**: Date-fns, Lucide-React, ExcelJS, clsx
+- **Utilities**: Date-fns, Lucide-React, ExcelJS, JSZip, clsx
 
 ---
 

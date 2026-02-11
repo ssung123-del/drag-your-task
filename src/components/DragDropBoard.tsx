@@ -328,8 +328,8 @@ const DragDropBoard: React.FC = () => {
 
     // Pending Data for Drop
     const [pendingDrop, setPendingDrop] = useState<{
-        type: 'block';
-        data: any; // BlockItem
+        type: 'block' | 'quick';
+        data: any; // BlockItem or QuickTask
         date: string;
         time: string
     } | null>(null);
@@ -733,7 +733,7 @@ const DragDropBoard: React.FC = () => {
                     block={(pendingDrop?.type === 'block' && pendingDrop.data) ? pendingDrop.data : selectedBlockForModal!}
                     time={pendingDrop?.time || ''}
                     date={pendingDrop?.date || ''}
-                    initialContent={pendingDrop?.type === 'quick' ? pendingDrop.data.content : ''}
+                    initialContent={pendingDrop?.type === 'quick' ? (pendingDrop.data as any).content : ''}
                     onConfirm={handleFinalConfirm}
                     onCancel={() => { setShowModal(false); setPendingDrop(null); setSelectedBlockForModal(null); }}
                 />

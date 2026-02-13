@@ -10,12 +10,7 @@ import {
 } from 'firebase/firestore';
 
 interface MinistryState {
-    user: {
-        uid: string | null;
-        email: string | null;
-        displayName: string | null;
-        photoURL: string | null;
-    } | null;
+    user: UserAuth | null;
     entries: MinistryEntry[];
     weeklyPlans: WeeklyPlan[];
     weeklyNotes: WeeklyNote[];
@@ -23,7 +18,7 @@ interface MinistryState {
     profile: UserProfile | null;
 
     // Actions
-    setUser: (user: any) => void;
+    setUser: (user: UserAuth | null) => void;
     setEntries: (entries: MinistryEntry[]) => void;
     addEntry: (entry: Omit<MinistryEntry, 'id' | 'createdAt'>) => Promise<void>;
     updateEntry: (id: string, entry: Partial<MinistryEntry>) => Promise<void>;
@@ -34,6 +29,13 @@ interface MinistryState {
     updateProfile: (profile: UserProfile) => Promise<void>;
     clearData: () => void;
 }
+
+type UserAuth = {
+    uid: string | null;
+    email: string | null;
+    displayName: string | null;
+    photoURL: string | null;
+};
 
 export const useMinistryStore = create<MinistryState>()(
     persist(

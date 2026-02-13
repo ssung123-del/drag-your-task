@@ -3,8 +3,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
     DndContext,
     DragOverlay,
-    useDraggable,
-    useDroppable,
     type DragStartEvent,
     type DragEndEvent,
     PointerSensor,
@@ -13,202 +11,20 @@ import {
     useSensors,
 } from '@dnd-kit/core';
 import { useMinistryStore } from '../store/useMinistryStore';
-import { type Category, type SubType, TIME_SLOTS, DAYS_OF_WEEK_KR } from '../types';
+import { type MinistryEntry, type SubType, TIME_SLOTS } from '../types';
 import { format, addDays, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { X, Check, GripVertical, Home, Briefcase, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Check, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import clsx from 'clsx';
+import type { BlockItem, BoardEntryItem } from './drag-board/types';
+import { MINISTRY_BLOCKS } from './drag-board/blocks';
+import DraggableBlock from './drag-board/DraggableBlock';
+import DroppableTimeSlot from './drag-board/DroppableTimeSlot';
 
-// ─── 타입 정의 ──────────────────────────────────────────────────
-interface BlockItem {
-    id: string;
-    category: Category;
-    label: string;
-    icon: React.ReactNode;
-    color: string;
-    textColor: string;
-    subTypes: { value: SubType; label: string }[];
-}
+type ActiveDragData = ({ type: 'block' } & BlockItem) | ({ type: 'entry' } & BoardEntryItem);
 
-// ─── 블록 데이터 ────────────────────────────────────────────────
-const MINISTRY_BLOCKS: BlockItem[] = [
-    {
-        id: 'block-visit',
-        category: '심방',
-        label: '심방',
-        icon: <Home size={22} />,
-        color: 'bg-blue-500',
-        textColor: 'text-white',
-        subTypes: [
-            { value: '방문심방', label: '방문' },
-            { value: '카페심방', label: '카페' },
-            { value: '전화심방', label: '전화' },
-        ],
-    },
-    {
-        id: 'block-work',
-        category: '업무',
-        label: '업무',
-        icon: <Briefcase size={22} />,
-        color: 'bg-green-500',
-        textColor: 'text-white',
-        subTypes: [
-            { value: '회의', label: '회의' },
-            { value: '행정', label: '행정' },
-            { value: '기타', label: '기타' },
-        ],
-    },
-];
-
-// ─── 드래그 가능한 블록 ─────────────────────────────────────────
-const DraggableBlock: React.FC<{ block: BlockItem }> = ({ block }) => {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-        id: block.id,
-        data: { type: 'block', ...block },
-    });
-
-    return (
-        <div
-            ref={setNodeRef}
-            {...listeners}
-            {...attributes}
-            className={clsx(
-                "flex items-center gap-2 md:gap-3 px-4 py-3 md:px-5 md:py-3.5 rounded-2xl font-bold transition-transform select-none touch-none shadow-lg outline-none w-full lg:max-w-[180px]",
-                block.color, block.textColor,
-                isDragging ? "opacity-30 scale-95" : "opacity-100 hover:scale-[1.02]"
-            )}
-        >
-            <GripVertical size={16} className="opacity-40 shrink-0" />
-            <div className="shrink-0">{block.icon}</div>
-            <span className="text-sm md:text-base whitespace-nowrap">{block.label}</span>
-        </div>
-    );
-};
-
-
-
-// ─── 드래그 가능한 등록된 업무 (Draggable Entry) ───────────────────
-const DraggableEntry: React.FC<{
-    entry: { id: string; subType: string; content: string; category: string; time: string; date: string };
-    viewMode: 'day' | 'week';
-    onEdit: (id: string, e: React.MouseEvent) => void;
-}> = ({ entry, viewMode, onEdit }) => {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-        id: entry.id,
-        data: { type: 'entry', ...entry },
-    });
-
-    return (
-        <div
-            ref={setNodeRef}
-            {...listeners}
-            {...attributes}
-            // Add double click to edit? Or normal click?
-            // If we allow click to edit, we need to be careful with drag.
-            // For now, let's just let the edit button handle editing, or use double click.
-            className={clsx(
-                "group/card flex items-center gap-1.5 rounded-lg text-[10px] font-bold shadow-sm border select-none transition-all w-full overflow-hidden cursor-grab active:cursor-grabbing",
-                viewMode === 'day' ? "px-3 py-2 text-xs" : "px-1.5 py-1",
-                entry.category === '심방'
-                    ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/20 dark:text-blue-100 dark:border-blue-500/50'
-                    : 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/20 dark:text-green-100 dark:border-green-500/50',
-                isDragging ? "opacity-30 z-50 scale-95" : "opacity-100 hover:scale-[1.02]"
-            )}
-            style={{ touchAction: 'none' }}
-        >
-            <span className="shrink-0 opacity-60 text-[10px]">{entry.category === '심방' ? '■' : '●'}</span>
-            <span className="truncate flex-1 text-left">{entry.content}</span>
-
-            <div className={clsx("flex items-center gap-0.5 shrink-0 opacity-0 group-hover/card:opacity-100 transition-opacity", viewMode === 'week' && "hidden group-hover/card:flex")}>
-                <button
-                    onPointerDown={(e) => e.stopPropagation()} // Prevent drag start when clicking button
-                    onClick={(e) => onEdit(entry.id, e)}
-                    className="p-1 rounded hover:bg-black/10 transition-colors"
-                >
-                    <Pencil size={10} />
-                </button>
-            </div>
-        </div>
-    );
-};
-
-// ─── 드롭 가능한 시간 슬롯 (메모이제이션 적용) ───────────────────
-const DroppableTimeSlot: React.FC<{
-    time: string;
-    date: string;
-    entries: { id: string; subType: string; content: string; category: string; time: string; date: string }[];
-    onEdit: (id: string, e: React.MouseEvent) => void;
-    onQuickAdd: (time: string, date: string) => void;
-    viewMode: 'day' | 'week';
-    isTodaySlot?: boolean;
-}> = React.memo(({ time, date, entries, onEdit, onQuickAdd, viewMode, isTodaySlot }) => {
-    const slotId = `slot-${date}-${time}`;
-    const { setNodeRef, isOver } = useDroppable({ id: slotId });
-
-    const getTimeLabel = (t: string) => {
-        if (t === '11:40') return '점심';
-        if (t === '17:00') return '저녁';
-        return t;
-    };
-
-    const isMealTime = time === '11:40' || time === '17:00';
-
-    return (
-        <div
-            ref={setNodeRef}
-            onClick={() => onQuickAdd(time, date)}
-            className={clsx(
-                "relative flex items-stretch rounded-xl transition-colors duration-150 group cursor-pointer border",
-                viewMode === 'day' ? "gap-3 min-h-[60px]" : "h-full flex-col p-1 gap-1 overflow-hidden",
-                isOver
-                    ? "bg-indigo-50 dark:bg-indigo-900/20 ring-2 ring-indigo-300 border-transparent"
-                    : isTodaySlot
-                        ? "bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-                        : "bg-card border-border/50 hover:bg-background/80 active:bg-background"
-            )}
-        >
-            {/* 시간 라벨 (Only for Day view) */}
-            {viewMode === 'day' && (
-                <div className="w-16 md:w-20 shrink-0 flex items-center justify-center border-r border-border/50">
-                    <span className={clsx(
-                        "text-xs md:text-sm font-bold tabular-nums",
-                        isMealTime ? "text-orange-500" : (isOver ? "text-indigo-600 dark:text-indigo-400" : "text-text-secondary")
-                    )}>
-                        {getTimeLabel(time)}
-                    </span>
-                </div>
-            )}
-
-            {/* 내용 표시 영역 */}
-            <div className={clsx("flex-1 flex flex-wrap gap-1.5 items-center min-w-0", viewMode === 'day' ? "p-2" : "content-start")}>
-                {entries.length === 0 && !isOver && viewMode === 'day' && (
-                    <div className="w-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-xs font-bold text-text-secondary/50">+ 추가</span>
-                    </div>
-                )}
-
-                {entries.length === 0 && isOver && (
-                    <span className="text-xs text-indigo-400 font-bold w-full text-center py-2">여기!</span>
-                )}
-
-                {entries.map((entry) => (
-                    <DraggableEntry
-                        key={entry.id}
-                        entry={entry}
-                        viewMode={viewMode}
-                        onEdit={onEdit}
-                    />
-                ))}
-            </div>
-        </div>
-    );
-}, (prev, next) => {
-    return prev.time === next.time &&
-        prev.date === next.date &&
-        prev.viewMode === next.viewMode &&
-        prev.isTodaySlot === next.isTodaySlot &&
-        prev.entries === next.entries;
-});
+const EMPTY_SLOT_ENTRIES: BoardEntryItem[] = [];
+const BOARD_GUIDE_KEY = 'drag-board-guide-dismissed-v1';
 
 // ─── 상세 내용 입력 모달 ──────────────────────────────────────
 const DetailModal: React.FC<{
@@ -234,7 +50,7 @@ const DetailModal: React.FC<{
             <div className="bg-card rounded-xl shadow-2xl w-full max-w-md p-6 space-y-5 border border-border">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-text">📝 사역 내용 입력</h3>
-                    <button onClick={onCancel} className="p-2 rounded-full hover:bg-background">
+                    <button onClick={onCancel} className="p-2 rounded-full hover:bg-background" aria-label="입력 모달 닫기">
                         <X size={20} className="text-text-secondary" />
                     </button>
                 </div>
@@ -283,6 +99,7 @@ const DetailModal: React.FC<{
                         className="w-full px-4 py-3 bg-background rounded-lg text-text font-medium h-28 focus:bg-card focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none placeholder:text-text-secondary/50 border border-border/50"
                         placeholder="사역 내용을 자유롭게 입력하세요..."
                         autoFocus
+                        aria-label="사역 내용 입력"
                     />
                 </div>
 
@@ -319,7 +136,7 @@ const DragDropBoard: React.FC = () => {
 
 
     // Drag & Modal State
-    const [activeDragData, setActiveDragData] = useState<any>(null); // QuickTask or Block
+    const [activeDragData, setActiveDragData] = useState<ActiveDragData | null>(null);
 
     // Modals
     const [showModal, setShowModal] = useState(false);
@@ -327,15 +144,12 @@ const DragDropBoard: React.FC = () => {
     const [showEditModal, setShowEditModal] = useState(false);
 
     // Pending Data for Drop
-    const [pendingDrop, setPendingDrop] = useState<{
-        type: 'block' | 'quick';
-        data: any; // BlockItem or QuickTask
-        date: string;
-        time: string
-    } | null>(null);
+    const [pendingDrop, setPendingDrop] = useState<{ data: BlockItem | null; date: string; time: string } | null>(null);
 
-    const [editingEntry, setEditingEntry] = useState<any>(null);
+    const [editingEntry, setEditingEntry] = useState<MinistryEntry | null>(null);
     const [lastSaved, setLastSaved] = useState<string | null>(null);
+    const [showGuide, setShowGuide] = useState(() => !localStorage.getItem(BOARD_GUIDE_KEY));
+    const [highlightedSlotKey, setHighlightedSlotKey] = useState<string | null>(null);
 
     // Responsive Check
     useEffect(() => {
@@ -374,9 +188,43 @@ const DragDropBoard: React.FC = () => {
         return entries.filter(e => dateSet.has(e.date));
     }, [entries, weekDates]);
 
+    const entriesBySlot = useMemo(() => {
+        const map = new Map<string, typeof viewEntries>();
+        for (const entry of viewEntries) {
+            const key = `${entry.date}|${entry.time}`;
+            const list = map.get(key);
+            if (list) {
+                list.push(entry);
+            } else {
+                map.set(key, [entry]);
+            }
+        }
+        return map;
+    }, [viewEntries]);
+
+    const getSlotEntries = (date: string, time: string) => {
+        return entriesBySlot.get(`${date}|${time}`) ?? EMPTY_SLOT_ENTRIES;
+    };
+
+    const flashSlot = (date: string, time: string) => {
+        const key = `${date}|${time}`;
+        setHighlightedSlotKey(key);
+        setTimeout(() => setHighlightedSlotKey(null), 1500);
+    };
+
+    const showSavedToast = () => {
+        setLastSaved(format(new Date(), 'HH:mm:ss'));
+        setTimeout(() => setLastSaved(null), 2000);
+    };
+
     // Drag Handlers
     const handleDragStart = (event: DragStartEvent) => {
-        setActiveDragData(event.active.data.current);
+        const data = event.active.data.current;
+        if (data && (data.type === 'block' || data.type === 'entry')) {
+            setActiveDragData(data as ActiveDragData);
+            return;
+        }
+        setActiveDragData(null);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -398,44 +246,18 @@ const DragDropBoard: React.FC = () => {
 
         // NEW: Handle existing entry drag
         if (type === 'entry') {
-            const entryData = active.data.current;
+            const entryData = active.data.current as BoardEntryItem | undefined;
             if (!entryData) return;
             // Only update if moved to a different time/date
             if (entryData.time !== time || entryData.date !== datePart) {
-                // We use updateEntry to move it. 
-                // Since updateEntry takes partial<MinistryEntry>, we just pass new date/time.
-                // Note: We need to make sure we are correctly calling updated functions.
-                // BUT, wait. updateEntry in store might just update subType/content?
-                // Left's check store... 
-                // Usually updateEntry(id, updates). 
-                // Assuming it handles date/time updates? 
-                // If not, we might need a moveEntry function. 
-                // But looking at types, MinistryEntry has date and time. So updateEntry should work if store allows it.
-                // Let's assume updateEntry works for now. 
-
-                // wait, updateEntry in DragDropBoard is used for EditModal:
-                // updateEntry(id, { subType, content })
-                // Let's check if we can pass date/time.
-                // Just in case, I will assume yes. 
-
-                // Actually, I can't verify store code right now easily without reading it, 
-                // but usually it uses set(state => ... map ... { ...entry, ...updates }).
-                // So date/time update should work.
-
-                // Let's call it:
                 updateEntry(entryData.id, { date: datePart, time: time });
-                setLastSaved(format(new Date(), 'HH:mm:ss'));
-                setTimeout(() => setLastSaved(null), 2000);
+                showSavedToast();
+                flashSlot(datePart, time);
             }
             return;
         }
 
-        setPendingDrop({
-            type: 'block',
-            data: active.data.current,
-            date: datePart,
-            time: time
-        });
+        setPendingDrop({ data: active.data.current as BlockItem, date: datePart, time });
 
         // If Quick Task -> Go to Category Selection
         // If Block -> Go to Detail Modal
@@ -456,9 +278,7 @@ const DragDropBoard: React.FC = () => {
     const handleFinalConfirm = async (subType: SubType, content: string) => {
         if (!pendingDrop) return;
 
-        const category = (pendingDrop.type === 'block' && pendingDrop.data)
-            ? pendingDrop.data.category
-            : selectedBlockForModal?.category;
+        const category = pendingDrop.data?.category ?? selectedBlockForModal?.category;
 
         if (!category) return;
 
@@ -476,28 +296,44 @@ const DragDropBoard: React.FC = () => {
         setShowModal(false);
         setPendingDrop(null);
         setSelectedBlockForModal(null);
-        setLastSaved(format(new Date(), 'HH:mm:ss'));
-        setTimeout(() => setLastSaved(null), 2000);
+        showSavedToast();
+        flashSlot(pendingDrop.date, pendingDrop.time);
     };
 
     // Quick Add via Click (Existing feature)
     const handleSlotClick = (time: string, date: string) => {
         // Treated same as dragging a default generic block? 
         // Or show the "Select Category" modal immediately.
-        setPendingDrop({
-            type: 'block', // We pretend it's a block drop, but which one? 
-            // Actually existing logic showed QuickModal to pick category.
-            // Let's reuse that.
-            data: null, // No block yet
-            date,
-            time
-        });
+        setPendingDrop({ data: null, date, time });
         setShowQuickModal(true);
     };
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} autoScroll={false}>
             <div className="space-y-4 max-w-[1600px] mx-auto">
+                {showGuide && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/40 rounded-2xl p-4 flex items-start gap-3">
+                        <Info size={18} className="text-blue-600 mt-0.5 shrink-0" />
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">
+                                블록을 시간칸으로 드래그하거나, 시간칸을 탭해서 빠르게 추가할 수 있어요.
+                            </p>
+                            <p className="text-xs text-blue-700/80 dark:text-blue-300/80 mt-1">
+                                모바일은 탭 추가가 더 빠르고, PC는 주간 뷰에서 드래그 이동이 편합니다.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                localStorage.setItem(BOARD_GUIDE_KEY, '1');
+                                setShowGuide(false);
+                            }}
+                            className="text-xs font-bold text-blue-700 dark:text-blue-200 hover:underline"
+                        >
+                            닫기
+                        </button>
+                    </div>
+                )}
+
                 {/* 헤더 */}
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -547,6 +383,12 @@ const DragDropBoard: React.FC = () => {
                         </div>
                     </div>
                 </div>
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold">저장 자동 동기화</span>
+                    <span className="px-2.5 py-1 rounded-full bg-background border border-border text-text-secondary font-semibold">
+                        {viewMode === 'week' ? 'PC/대화면: 주간 보기' : '모바일/태블릿: 일간 보기'}
+                    </span>
+                </div>
 
                 {/* Main Content Layout */}
                 <div className="flex flex-col lg:flex-row gap-6">
@@ -575,7 +417,7 @@ const DragDropBoard: React.FC = () => {
                                         key={time}
                                         time={time}
                                         date={selectedDate}
-                                        entries={viewEntries.filter(e => e.time === time)}
+                                        entries={getSlotEntries(selectedDate, time)}
                                         onEdit={(id, e) => {
                                             e?.stopPropagation();
                                             const entry = entries.find(e => e.id === id);
@@ -583,6 +425,7 @@ const DragDropBoard: React.FC = () => {
                                         }}
                                         onQuickAdd={handleSlotClick}
                                         viewMode="day"
+                                        isHighlighted={highlightedSlotKey === `${selectedDate}|${time}`}
                                     />
                                 ))}
                             </div>
@@ -594,7 +437,7 @@ const DragDropBoard: React.FC = () => {
                                 {/* Header Row */}
                                 <div className="grid grid-cols-[60px_repeat(7,minmax(0,1fr))] border-b border-border bg-background/50 sticky top-0 z-10">
                                     <div className="p-3 text-center text-xs font-bold text-text-secondary border-r border-border">Time</div>
-                                    {weekDates.map((d, i) => {
+                                    {weekDates.map((d) => {
                                         const isTodayDate = isSameDay(new Date(d), new Date());
                                         return (
                                             <div key={d} className={clsx(
@@ -602,7 +445,7 @@ const DragDropBoard: React.FC = () => {
                                                 isTodayDate && "bg-indigo-50/50 dark:bg-indigo-900/10"
                                             )}>
                                                 <span className={clsx("text-xs font-medium", isTodayDate ? "text-indigo-600 dark:text-indigo-400" : "text-text-secondary")}>
-                                                    {DAYS_OF_WEEK_KR[i % 7]}
+                                                    {format(new Date(d), 'eee', { locale: ko })}
                                                 </span>
                                                 <span className={clsx("text-sm font-bold w-8 h-8 flex items-center justify-center rounded-full", isTodayDate ? "bg-indigo-600 text-white shadow-md" : "text-text")}>
                                                     {format(new Date(d), 'd')}
@@ -639,7 +482,7 @@ const DragDropBoard: React.FC = () => {
                                                         <DroppableTimeSlot
                                                             time={time}
                                                             date={d}
-                                                            entries={viewEntries.filter(e => e.time === time && e.date === d)}
+                                                            entries={getSlotEntries(d, time)}
                                                             onEdit={(id, e) => {
                                                                 e?.stopPropagation();
                                                                 const entry = entries.find(e => e.id === id);
@@ -648,6 +491,7 @@ const DragDropBoard: React.FC = () => {
                                                             onQuickAdd={handleSlotClick}
                                                             viewMode="week"
                                                             isTodaySlot={isSameDay(new Date(d), new Date())}
+                                                            isHighlighted={highlightedSlotKey === `${d}|${time}`}
                                                         />
                                                     </div>
                                                 ))}
@@ -663,8 +507,8 @@ const DragDropBoard: React.FC = () => {
 
                 {/* 저장 알림 */}
                 {lastSaved && (
-                    <div className="fixed bottom-6 right-6 px-4 py-2 bg-emerald-500 text-white rounded-lg flex items-center gap-2 text-sm font-bold shadow-lg animate-in fade-in slide-in-from-bottom-2">
-                        <Check size={16} /> 저장됨
+                    <div className="fixed bottom-6 right-6 px-4 py-2 bg-emerald-500 text-white rounded-lg flex items-center gap-2 text-sm font-bold shadow-lg animate-in fade-in slide-in-from-bottom-2" role="status" aria-live="polite">
+                        <Check size={16} /> 저장됨 ({lastSaved})
                     </div>
                 )}
             </div>
@@ -711,6 +555,7 @@ const DragDropBoard: React.FC = () => {
                                         "flex items-center gap-3 p-4 rounded-xl text-white shadow-md transition-transform active:scale-[0.98]",
                                         block.color
                                     )}
+                                    aria-label={`${block.label} 선택`}
                                 >
                                     <div className="p-2 bg-white/20 rounded-lg">{block.icon}</div>
                                     <div className="text-lg font-bold">{block.label}</div>
@@ -728,12 +573,11 @@ const DragDropBoard: React.FC = () => {
             )}
 
             {/* Detail Modal */}
-            {showModal && (pendingDrop?.data || selectedBlockForModal) && (
+            {showModal && pendingDrop && (pendingDrop.data || selectedBlockForModal) && (
                 <DetailModal
-                    block={(pendingDrop?.type === 'block' && pendingDrop.data) ? pendingDrop.data : selectedBlockForModal!}
-                    time={pendingDrop?.time || ''}
-                    date={pendingDrop?.date || ''}
-                    initialContent={pendingDrop?.type === 'quick' ? (pendingDrop.data as any).content : ''}
+                    block={pendingDrop.data ?? selectedBlockForModal!}
+                    time={pendingDrop.time}
+                    date={pendingDrop.date}
                     onConfirm={handleFinalConfirm}
                     onCancel={() => { setShowModal(false); setPendingDrop(null); setSelectedBlockForModal(null); }}
                 />
@@ -745,10 +589,10 @@ const DragDropBoard: React.FC = () => {
                     entry={editingEntry}
                     onConfirm={async (id, subType, content) => {
                         await updateEntry(id, { subType, content });
+                        flashSlot(editingEntry.date, editingEntry.time);
                         setShowEditModal(false);
                         setEditingEntry(null);
-                        setLastSaved(format(new Date(), 'HH:mm:ss'));
-                        setTimeout(() => setLastSaved(null), 2000);
+                        showSavedToast();
                     }}
                     onCancel={() => { setShowEditModal(false); setEditingEntry(null); }}
                     onDelete={async (id) => {
@@ -766,7 +610,7 @@ const DragDropBoard: React.FC = () => {
 
 // ... Edit Modal (Missing in previous chunk, adding it now)
 const EditModal: React.FC<{
-    entry: any; // Using any for brevity in this glue, but should be MinistryEntry
+    entry: MinistryEntry;
     onConfirm: (id: string, subType: SubType, content: string) => void;
     onCancel: () => void;
     onDelete: (id: string) => void;
@@ -793,7 +637,7 @@ const EditModal: React.FC<{
                             <span className="sr-only">삭제</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
                         </button>
-                        <button onClick={onCancel} className="p-2 rounded-full hover:bg-background">
+                        <button onClick={onCancel} className="p-2 rounded-full hover:bg-background" aria-label="수정 모달 닫기">
                             <X size={20} className="text-text-secondary" />
                         </button>
                     </div>
@@ -835,6 +679,7 @@ const EditModal: React.FC<{
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         className="w-full px-4 py-3 bg-background rounded-lg text-text font-medium h-28 focus:bg-card focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none placeholder:text-text-secondary/50 border border-border/50"
+                        aria-label="사역 내용 수정"
                     />
                 </div>
                 <div className="flex gap-3 pt-1">

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import WeekSelector from '../components/WeekSelector';
 import { useMinistryStore } from '../store/useMinistryStore';
 import { format, startOfWeek } from 'date-fns';
@@ -7,32 +7,72 @@ import { PLAN_LABELS, type WeeklyPlan, type WeeklyNote } from '../types';
 
 const PlansPage: React.FC = () => {
     const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
+    const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+    const [planDrafts, setPlanDrafts] = useState<Record<string, string>>({});
+    const [noteDraft, setNoteDraft] = useState<string | null>(null);
     const { weeklyPlans, updateWeeklyPlan, weeklyNotes, updateWeeklyNote } = useMinistryStore();
 
     const weekStr = format(currentWeekStart, 'yyyy-MM-dd');
 
-    const currentPlan = weeklyPlans.find(
-        (p) => p.weekStartDate === weekStr
-    ) || { weekStartDate: weekStr, plans: {} };
+    const currentPlan = useMemo(
+        () =>
+            weeklyPlans.find((p) => p.weekStartDate === weekStr) || { weekStartDate: weekStr, plans: {} },
+        [weeklyPlans, weekStr],
+    );
 
-    const currentNote = weeklyNotes.find(
-        (n) => n.weekStartDate === weekStr
-    ) || { weekStartDate: weekStr, specialNote: '', dawnPrayerDays: [] };
+    const currentNote = useMemo(
+        () =>
+            weeklyNotes.find((n) => n.weekStartDate === weekStr) || { weekStartDate: weekStr, specialNote: '', dawnPrayerDays: [] },
+        [weeklyNotes, weekStr],
+    );
+
+    useEffect(() => {
+        if (Object.keys(planDrafts).length === 0) return;
+
+        const timer = window.setTimeout(() => {
+            const mergedPlans = { ...currentPlan.plans, ...planDrafts };
+            const isSamePlan = JSON.stringify(mergedPlans) === JSON.stringify(currentPlan.plans);
+            if (isSamePlan) return;
+
+            updateWeeklyPlan({
+                weekStartDate: weekStr,
+                plans: mergedPlans,
+            } as WeeklyPlan);
+            setLastSavedAt(new Date().toLocaleTimeString('ko-KR', { hour12: false }));
+        }, 300);
+
+        return () => window.clearTimeout(timer);
+    }, [planDrafts, currentPlan.plans, updateWeeklyPlan, weekStr]);
+
+    useEffect(() => {
+        if (noteDraft === null) return;
+
+        const timer = window.setTimeout(() => {
+            if (noteDraft === currentNote.specialNote) return;
+
+            updateWeeklyNote({
+                ...currentNote,
+                weekStartDate: weekStr,
+                specialNote: noteDraft,
+            } as WeeklyNote);
+            setLastSavedAt(new Date().toLocaleTimeString('ko-KR', { hour12: false }));
+        }, 300);
+
+        return () => window.clearTimeout(timer);
+    }, [noteDraft, currentNote, updateWeeklyNote, weekStr]);
+
+    const handleWeekChange = (date: Date) => {
+        setCurrentWeekStart(date);
+        setPlanDrafts({});
+        setNoteDraft(null);
+    };
 
     const handlePlanChange = (idx: number, content: string) => {
-        const newPlans = { ...currentPlan.plans, [idx]: content };
-        updateWeeklyPlan({
-            weekStartDate: weekStr,
-            plans: newPlans
-        } as WeeklyPlan);
+        setPlanDrafts((prev) => ({ ...prev, [idx]: content }));
     };
 
     const handleNoteChange = (content: string) => {
-        updateWeeklyNote({
-            ...currentNote,
-            weekStartDate: weekStr,
-            specialNote: content
-        } as WeeklyNote);
+        setNoteDraft(content);
     };
 
     const toggleDawnPrayer = (day: string) => {
@@ -49,6 +89,7 @@ const PlansPage: React.FC = () => {
             weekStartDate: weekStr,
             dawnPrayerDays: newDays
         } as WeeklyNote);
+        setLastSavedAt(new Date().toLocaleTimeString('ko-KR', { hour12: false }));
     };
 
     return (
@@ -56,10 +97,15 @@ const PlansPage: React.FC = () => {
             <h2 className="text-3xl font-extrabold text-text tracking-tight flex items-center gap-2 py-4">
                 📅 계획 및 메모
             </h2>
+            {lastSavedAt && (
+                <p className="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 inline-flex px-3 py-1 rounded-full">
+                    저장됨 · {lastSavedAt}
+                </p>
+            )}
 
             <WeekSelector
                 currentWeekStart={currentWeekStart}
-                onWeekChange={setCurrentWeekStart}
+                onWeekChange={handleWeekChange}
             />
 
             {/* Next Week Plans Section */}
@@ -79,10 +125,11 @@ const PlansPage: React.FC = () => {
                             </label>
                             <input
                                 type="text"
-                                value={currentPlan.plans[idx] || ''}
+                                value={planDrafts[idx] ?? currentPlan.plans[idx] ?? ''}
                                 onChange={(e) => handlePlanChange(idx, e.target.value)}
                                 className="w-full px-5 py-3.5 bg-background border border-transparent rounded-2xl text-text font-medium focus:bg-card focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all placeholder:text-text-secondary/50 shadow-sm"
                                 placeholder={`계획 입력...`}
+                                aria-label={`${label} 계획 입력`}
                             />
                         </div>
                     ))}
@@ -115,6 +162,8 @@ const PlansPage: React.FC = () => {
                                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
                                     : 'bg-card text-text-secondary hover:bg-background border border-border shadow-sm'
                                     }`}
+                                aria-pressed={currentNote.dawnPrayerDays.includes(day)}
+                                aria-label={`${day} 새벽예배 참석 토글`}
                             >
                                 {day}
                             </button>
@@ -128,10 +177,11 @@ const PlansPage: React.FC = () => {
                         주의사항 / 기도제목 / 비고
                     </label>
                     <textarea
-                        value={currentNote.specialNote}
+                        value={noteDraft ?? currentNote.specialNote}
                         onChange={(e) => handleNoteChange(e.target.value)}
                         className="w-full px-5 py-4 bg-background border border-transparent rounded-2xl text-text font-medium h-40 focus:bg-card focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none resize-none transition-all placeholder:text-text-secondary/50 shadow-sm"
                         placeholder="이번 주의 특별한 사역 사항이나 기록할 메모를 입력하세요..."
+                        aria-label="특이사항 메모"
                     />
                 </div>
             </div>

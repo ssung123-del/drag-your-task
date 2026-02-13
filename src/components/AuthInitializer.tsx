@@ -23,7 +23,7 @@ export const AuthInitializer = () => {
                 });
             } else {
                 setUser(null);
-                // 로그아웃 시 필요하다면 clearData() 호출 가능
+                clearData();
             }
         });
 

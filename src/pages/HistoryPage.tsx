@@ -11,11 +11,32 @@ const HistoryPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('ALL');
 
+    const normalizedTerm = searchTerm.trim().toLowerCase();
     const filteredEntries = entries.filter((entry) => {
-        const matchSearch = entry.content.includes(searchTerm) || entry.subType.includes(searchTerm);
+        const entryContent = entry.content.toLowerCase();
+        const entrySubType = entry.subType.toLowerCase();
+        const matchSearch = !normalizedTerm || entryContent.includes(normalizedTerm) || entrySubType.includes(normalizedTerm);
         const matchCategory = filterCategory === 'ALL' || entry.category === filterCategory;
         return matchSearch && matchCategory;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const highlightMatch = (text: string) => {
+        if (!normalizedTerm) return text;
+        const lowerText = text.toLowerCase();
+        const idx = lowerText.indexOf(normalizedTerm);
+        if (idx < 0) return text;
+
+        const before = text.slice(0, idx);
+        const matched = text.slice(idx, idx + normalizedTerm.length);
+        const after = text.slice(idx + normalizedTerm.length);
+        return (
+            <>
+                {before}
+                <mark className="bg-yellow-200/80 text-inherit rounded px-0.5">{matched}</mark>
+                {after}
+            </>
+        );
+    };
 
     const handleDelete = (id: string) => {
         if (confirm('정말 삭제하시겠습니까?')) {
@@ -39,7 +60,11 @@ const HistoryPage: React.FC = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-11 pr-4 py-3 bg-background rounded-2xl text-text font-medium focus:bg-card focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder:text-text-secondary/50"
                         placeholder="사역 내용으로 검색..."
+                        aria-label="사역 기록 검색"
                     />
+                </div>
+                <div className="px-1 text-xs font-semibold text-text-secondary">
+                    총 {entries.length}건 중 {filteredEntries.length}건 표시
                 </div>
                 <div className="flex items-center gap-2">
                     <label className="text-sm font-semibold text-text-secondary ml-1">필터</label>
@@ -54,6 +79,7 @@ const HistoryPage: React.FC = () => {
                                         ? "bg-card text-text shadow-sm"
                                         : "text-text-secondary hover:text-text"
                                 )}
+                                aria-label={`${cat === 'ALL' ? '전체' : cat} 필터`}
                             >
                                 {cat === 'ALL' ? '전체' : cat}
                             </button>
@@ -91,7 +117,7 @@ const HistoryPage: React.FC = () => {
                             </div>
 
                             <p className="text-text text-base font-medium leading-relaxed">
-                                {entry.content}
+                                {highlightMatch(entry.content)}
                             </p>
 
                             <button

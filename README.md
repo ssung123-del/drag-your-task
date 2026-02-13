@@ -67,7 +67,18 @@ npm run dev
 ```
 
 ### 환경 설정
-- `.lib/firebase.ts` 파일에 자신의 Firebase 설정값을 입력해야 클라우드 기능을 사용할 수 있습니다.
+- `.env` 파일에 Firebase 설정을 입력하면 클라우드 기능을 사용할 수 있습니다.
+- 예시:
+```bash
+cp .env.example .env
+```
+- 필요한 키:
+  - `VITE_FIREBASE_API_KEY`
+  - `VITE_FIREBASE_AUTH_DOMAIN`
+  - `VITE_FIREBASE_PROJECT_ID`
+  - `VITE_FIREBASE_STORAGE_BUCKET`
+  - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+  - `VITE_FIREBASE_APP_ID`
 
 ---
 

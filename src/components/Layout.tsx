@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { ClipboardList, BarChart2, Calendar, Download, Settings } from 'lucide-react';
+import { ClipboardList, BarChart2, Calendar, Download, Settings, LogOut, User } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface LayoutProps {
@@ -17,26 +17,45 @@ interface LayoutProps {
  * → 넓은 화면에서는 좌측 사이드바가 콘텐츠 공간 활용에 유리
  */
 import { auth, googleProvider } from '../lib/firebase';
-import { signInWithPopup, signOut } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth';
 import { useMinistryStore } from '../store/useMinistryStore';
-import { LogOut, User } from 'lucide-react';
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const user = useMinistryStore(state => state.user);
+    const clearData = useMinistryStore(state => state.clearData);
 
     const handleLogin = async () => {
         try {
             await signInWithPopup(auth, googleProvider);
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Login failed:", error);
-            alert("로그인에 실패했습니다.");
+            const code = typeof error === 'object' && error !== null && 'code' in error
+                ? String((error as { code?: unknown }).code || '')
+                : '';
+
+            if (code.includes('auth/unauthorized-domain')) {
+                alert("로그인 도메인이 Firebase에 등록되지 않았습니다. localhost로 접속했는지 확인해주세요.");
+                return;
+            }
+
+            if (code.includes('auth/popup-blocked')) {
+                await signInWithRedirect(auth, googleProvider);
+                return;
+            }
+
+            if (code.includes('auth/cancelled-popup-request')) {
+                await signInWithRedirect(auth, googleProvider);
+                return;
+            }
+
+            alert("로그인에 실패했습니다. 잠시 후 다시 시도해주세요.");
         }
     };
 
     const handleLogout = async () => {
         if (confirm("로그아웃 하시겠습니까?")) {
             await signOut(auth);
-            window.location.reload(); // 상태 완전 초기화를 위해 새로고침
+            clearData();
         }
     };
 
@@ -106,11 +125,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-bold text-text truncate">{user.displayName || "선교 사역자"}</p>
                                     <p className="text-[10px] text-text-secondary truncate">{user.email}</p>
+                                    <p className="text-[10px] text-emerald-600 font-semibold">클라우드 동기화 연결됨</p>
                                 </div>
                             </div>
                             <button
                                 onClick={handleLogout}
                                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                                aria-label="로그아웃"
                             >
                                 <LogOut size={14} />
                                 로그아웃
@@ -120,6 +141,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <button
                             onClick={handleLogin}
                             className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all active:scale-95 group"
+                            aria-label="Google 계정으로 로그인"
                         >
                             <div className="w-6 h-6 flex items-center justify-center">
                                 <svg viewBox="0 0 24 24" className="w-5 h-5">
@@ -149,6 +171,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                                 onClick={handleLogout}
                                 className="flex items-center gap-2 bg-card p-1 pr-3 rounded-full border border-border active:scale-95 transition-all"
+                                aria-label="로그아웃"
                             >
                                 {user.photoURL ? (
                                     <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full shadow-sm" />
@@ -163,6 +186,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <button
                                 onClick={handleLogin}
                                 className="flex items-center gap-1.5 bg-indigo-600 text-white px-3 py-1.5 rounded-full text-[10px] font-black shadow-lg shadow-indigo-200 active:scale-95 transition-all"
+                                aria-label="Google 계정으로 로그인"
                             >
                                 <User size={12} />
                                 로그인

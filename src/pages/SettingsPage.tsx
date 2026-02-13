@@ -2,13 +2,54 @@
 import React, { useRef } from 'react';
 import { useMinistryStore } from '../store/useMinistryStore';
 import { Save, Upload, RotateCcw, AlertTriangle } from 'lucide-react';
+import type { MinistryEntry, WeeklyNote, WeeklyPlan, UserProfile } from '../types';
+
+type BackupPayload = {
+    version: 1;
+    createdAt: string;
+    data: {
+        entries: MinistryEntry[];
+        weeklyPlans: WeeklyPlan[];
+        weeklyNotes: WeeklyNote[];
+        profile: UserProfile | null;
+    };
+};
+
+const isBackupPayload = (value: unknown): value is BackupPayload => {
+    if (!value || typeof value !== 'object') return false;
+    const payload = value as Record<string, unknown>;
+    if (payload.version !== 1) return false;
+    if (!payload.data || typeof payload.data !== 'object') return false;
+
+    const data = payload.data as Record<string, unknown>;
+    return (
+        Array.isArray(data.entries) &&
+        Array.isArray(data.weeklyPlans) &&
+        Array.isArray(data.weeklyNotes)
+    );
+};
 
 const SettingsPage: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const state = useMinistryStore();
+    const entries = useMinistryStore(state => state.entries);
+    const weeklyPlans = useMinistryStore(state => state.weeklyPlans);
+    const weeklyNotes = useMinistryStore(state => state.weeklyNotes);
+    const profile = useMinistryStore(state => state.profile);
+    const clearData = useMinistryStore(state => state.clearData);
 
     const handleBackup = () => {
-        const data = JSON.stringify(state, null, 2);
+        const payload: BackupPayload = {
+            version: 1,
+            createdAt: new Date().toISOString(),
+            data: {
+                entries,
+                weeklyPlans,
+                weeklyNotes,
+                profile,
+            },
+        };
+
+        const data = JSON.stringify(payload, null, 2);
         const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -22,32 +63,40 @@ const SettingsPage: React.FC = () => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        if (!confirm('현재 데이터가 모두 삭제되고 백업 파일로 덮어씌워집니다. 계속하시겠습니까?')) {
+        if (!confirm('복원을 진행하면 현재 기록/주간계획/메모/프로필이 백업 파일로 교체됩니다. 계속하시겠습니까?')) {
             return;
         }
 
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
-                const json = JSON.parse(event.target?.result as string);
-                // We need to hydrate the store manually.
-                // Zustand persist middleware usually handles hydration, but manual override needs care.
-                // The easiest way is to use the store's set state if exposed, or just reload page after clearing storage + setting new.
+                const raw = JSON.parse(event.target?.result as string);
+                if (!isBackupPayload(raw)) {
+                    throw new Error('INVALID_BACKUP_FORMAT');
+                }
 
-                // Hacky but reliable way for localStorage persist:
-                localStorage.setItem('ministry-store', JSON.stringify({ state: json, version: 0 }));
-                window.location.reload();
-            } catch (err) {
+                useMinistryStore.setState({
+                    entries: raw.data.entries,
+                    weeklyPlans: raw.data.weeklyPlans,
+                    weeklyNotes: raw.data.weeklyNotes,
+                    profile: raw.data.profile ?? null,
+                });
+
+                alert('백업을 성공적으로 복원했습니다.');
+            } catch {
                 alert('올바르지 않은 백업 파일입니다.');
+            } finally {
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
             }
         };
         reader.readAsText(file);
     };
 
     const handleReset = () => {
-        if (confirm('정말 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다!')) {
-            localStorage.removeItem('ministry-store');
-            window.location.reload();
+        if (confirm('정말 초기화하시겠습니까?\n영향 범위: 기록, 주간 계획, 메모, 프로필\n이 작업은 되돌릴 수 없습니다.')) {
+            clearData();
         }
     };
 
@@ -69,6 +118,7 @@ const SettingsPage: React.FC = () => {
                     <button
                         onClick={handleBackup}
                         className="w-full bg-[#007AFF] hover:bg-[#0062cc] text-white py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+                        aria-label="백업 파일 만들기"
                     >
                         <Save size={20} />
                         백업 파일 만들기
@@ -77,6 +127,7 @@ const SettingsPage: React.FC = () => {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         className="w-full bg-background hover:bg-border text-text-secondary py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        aria-label="백업 파일 불러오기"
                     >
                         <Upload size={20} />
                         백업 불러오기
@@ -99,9 +150,16 @@ const SettingsPage: React.FC = () => {
                 <p className="text-sm text-red-600 font-medium leading-relaxed">
                     주의: 앱 초기화 시 모든 기록, 주간 계획, 설정 및 프로필 정보가 영구적으로 삭제됩니다.
                 </p>
+                <ul className="text-xs text-red-700/80 list-disc pl-4 space-y-1">
+                    <li>사역 기록 {entries.length}건</li>
+                    <li>주간 계획 {weeklyPlans.length}건</li>
+                    <li>주간 메모 {weeklyNotes.length}건</li>
+                    <li>사역자 프로필 {profile ? '1건' : '없음'}</li>
+                </ul>
                 <button
                     onClick={handleReset}
                     className="w-full bg-card text-red-500 border border-red-500/20 hover:bg-red-500/10 py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
+                    aria-label="모든 데이터 초기화"
                 >
                     <RotateCcw size={20} />
                     모든 데이터 초기화

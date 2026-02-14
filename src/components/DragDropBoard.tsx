@@ -179,8 +179,18 @@ const DragDropBoard: React.FC = () => {
         return eachDayOfInterval({
             start,
             end: endOfWeek(new Date(selectedDate), { weekStartsOn: 0 })
-        }).map(d => format(d, 'yyyy-MM-dd'));
+        })
+            .filter((d) => d.getDay() !== 1) // 월요일 제외
+            .map((d) => format(d, 'yyyy-MM-dd'));
     }, [selectedDate, viewMode]);
+
+    const weekGridTemplateColumns = useMemo(
+        () => `60px repeat(${weekDates.length}, minmax(0, 1fr))`,
+        [weekDates.length],
+    );
+
+    const weekRangeStart = weekDates[0];
+    const weekRangeEnd = weekDates[weekDates.length - 1];
 
     // Derived Data: Entries for the current view (Day or Week)
     const viewEntries = useMemo(() => {
@@ -369,7 +379,9 @@ const DragDropBoard: React.FC = () => {
                                         </>
                                     ) : (
                                         <>
-                                            {format(new Date(weekDates[0]), 'MM.dd')} ~ {format(new Date(weekDates[6]), 'MM.dd')}
+                                            {weekRangeStart && weekRangeEnd
+                                                ? `${format(new Date(weekRangeStart), 'MM.dd')} ~ ${format(new Date(weekRangeEnd), 'MM.dd')}`
+                                                : ''}
                                         </>
                                     )}
                                 </span>
@@ -435,7 +447,10 @@ const DragDropBoard: React.FC = () => {
                         {viewMode === 'week' && (
                             <div className="flex flex-col h-full min-w-[800px] overflow-x-auto">
                                 {/* Header Row */}
-                                <div className="grid grid-cols-[60px_repeat(7,minmax(0,1fr))] border-b border-border bg-background/50 sticky top-0 z-10">
+                                <div
+                                    className="grid border-b border-border bg-background/50 sticky top-0 z-10"
+                                    style={{ gridTemplateColumns: weekGridTemplateColumns }}
+                                >
                                     <div className="p-3 text-center text-xs font-bold text-text-secondary border-r border-border">Time</div>
                                     {weekDates.map((d) => {
                                         const isTodayDate = isSameDay(new Date(d), new Date());
@@ -460,10 +475,14 @@ const DragDropBoard: React.FC = () => {
                                     {TIME_SLOTS.map(time => {
                                         const isMealTime = time === '11:40' || time === '17:00';
                                         return (
-                                            <div key={time} className={clsx(
-                                                "grid grid-cols-[60px_repeat(7,minmax(0,1fr))] h-[100px]",
-                                                isMealTime && "bg-orange-50/30 dark:bg-orange-900/10"
-                                            )}>
+                                            <div
+                                                key={time}
+                                                className={clsx(
+                                                    "grid h-[100px]",
+                                                    isMealTime && "bg-orange-50/30 dark:bg-orange-900/10"
+                                                )}
+                                                style={{ gridTemplateColumns: weekGridTemplateColumns }}
+                                            >
                                                 {/* Time Label Column */}
                                                 <div className={clsx(
                                                     "flex flex-col items-center justify-start pt-3 text-xs font-bold border-r border-border",

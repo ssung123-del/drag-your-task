@@ -344,12 +344,18 @@ const DragDropBoard: React.FC = () => {
                     </div>
                 )}
 
-                {/* 헤더 */}
-                <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-                    <div className="flex items-center gap-3">
+                {/* 헤더: 제목 + 기본 블록 + 날짜 네비게이션을 한 줄로 */}
+                <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
                         <h2 className="text-2xl font-extrabold text-text tracking-tight flex items-center gap-2">
                             ✏️ 사역 기록 <span className="text-sm font-normal text-text-secondary bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full">{viewMode === 'week' ? '주간 View' : '일간 View'}</span>
                         </h2>
+                        {/* 기본 블록 - 헤더에 인라인 배치 */}
+                        <div className="flex items-center gap-1.5">
+                            {MINISTRY_BLOCKS.map(block => (
+                                <DraggableBlock key={block.id} block={block} />
+                            ))}
+                        </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 md:gap-4">
@@ -402,24 +408,8 @@ const DragDropBoard: React.FC = () => {
                     </span>
                 </div>
 
-                {/* Main Content Layout */}
-                <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Left Panel: Blocks & Quick Tasks */}
-                    <div className="lg:w-64 shrink-0 space-y-4">
-                        {/* Standard Blocks */}
-                        <div className="bg-card rounded-2xl shadow-sm border border-border p-4">
-                            <h3 className="text-xs font-bold text-text-secondary mb-3 uppercase tracking-wider">기본 블록</h3>
-                            <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide">
-                                {MINISTRY_BLOCKS.map(block => (
-                                    <DraggableBlock key={block.id} block={block} />
-                                ))}
-                            </div>
-                        </div>
-
-
-                    </div>
-
-                    {/* Right Panel: Calendar Board */}
+                {/* 타임테이블 */}
+                <div className="flex flex-col gap-4">
                     <div className="flex-1 min-w-0 bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
                         {/* Day View Implementation */}
                         {viewMode === 'day' && (
@@ -536,10 +526,10 @@ const DragDropBoard: React.FC = () => {
             <DragOverlay>
                 {activeDragData && activeDragData.type === 'block' && (
                     <div className={clsx(
-                        "flex items-center gap-3 px-5 py-3 rounded-xl font-bold text-base shadow-xl opacity-90 pointer-events-none",
+                        "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold text-xs shadow-xl opacity-90 pointer-events-none",
                         activeDragData.color, activeDragData.textColor
                     )}>
-                        {activeDragData.icon}
+                        <div className="shrink-0 [&>svg]:w-3.5 [&>svg]:h-3.5">{activeDragData.icon}</div>
                         <span>{activeDragData.label}</span>
                     </div>
                 )}

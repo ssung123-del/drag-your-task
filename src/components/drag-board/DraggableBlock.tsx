@@ -22,15 +22,15 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({ block }) => {
             role="button"
             aria-label={`${block.label} 블록 드래그`}
             className={clsx(
-                "flex items-center gap-2 md:gap-3 px-4 py-3 md:px-5 md:py-3.5 rounded-2xl font-bold transition-transform select-none touch-none shadow-lg outline-none w-full lg:max-w-[180px]",
+                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold transition-transform select-none touch-none shadow-sm outline-none text-xs",
                 block.color,
                 block.textColor,
-                isDragging ? "opacity-30 scale-95" : "opacity-100 hover:scale-[1.02]"
+                isDragging ? "opacity-30 scale-95" : "opacity-100 hover:scale-[1.03]"
             )}
         >
-            <GripVertical size={16} className="opacity-40 shrink-0" />
-            <div className="shrink-0">{block.icon}</div>
-            <span className="text-sm md:text-base whitespace-nowrap">{block.label}</span>
+            <GripVertical size={12} className="opacity-40 shrink-0" />
+            <div className="shrink-0 [&>svg]:w-3.5 [&>svg]:h-3.5">{block.icon}</div>
+            <span className="whitespace-nowrap">{block.label}</span>
         </div>
     );
 };

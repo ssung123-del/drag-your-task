@@ -10,7 +10,8 @@ interface DraggableEntryProps {
     onEdit: (id: string, e: React.MouseEvent) => void;
 }
 
-const DraggableEntry: React.FC<DraggableEntryProps> = ({ entry, viewMode, onEdit }) => {
+// React.memo로 감싸서 동일한 entry면 리렌더 방지
+const DraggableEntry: React.FC<DraggableEntryProps> = React.memo(({ entry, viewMode, onEdit }) => {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: entry.id,
         data: { type: 'entry', ...entry },
@@ -26,8 +27,8 @@ const DraggableEntry: React.FC<DraggableEntryProps> = ({ entry, viewMode, onEdit
                 "group/card flex items-center gap-1.5 rounded-lg text-[10px] font-bold shadow-sm border select-none transition-all w-full overflow-hidden cursor-grab active:cursor-grabbing",
                 viewMode === 'day' ? "px-3 py-2 text-xs" : "px-1.5 py-1",
                 entry.category === '심방'
-                    ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/20 dark:text-blue-100 dark:border-blue-500/50'
-                    : 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/20 dark:text-green-100 dark:border-green-500/50',
+                    ? 'bg-blue-100 text-blue-700 border-blue-200'
+                    : 'bg-green-100 text-green-700 border-green-200',
                 isDragging ? "opacity-30 z-50 scale-95" : "opacity-100 hover:scale-[1.02]"
             )}
             style={{ touchAction: 'none' }}
@@ -47,6 +48,6 @@ const DraggableEntry: React.FC<DraggableEntryProps> = ({ entry, viewMode, onEdit
             </div>
         </div>
     );
-};
+});
 
 export default DraggableEntry;

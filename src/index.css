@@ -14,15 +14,7 @@
   --color-border: rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #000000;
-    --color-card: #1C1C1E;
-    --color-text: #FFFFFF;
-    --color-text-secondary: #8E8E93;
-    --color-border: rgba(255, 255, 255, 0.1);
-  }
-}
+
 
 @theme {
   --color-primary: var(--color-primary);

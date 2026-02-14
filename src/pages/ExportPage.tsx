@@ -71,14 +71,14 @@ const ExportPage: React.FC = () => {
             <div className="bg-card rounded-3xl shadow-xl border border-border overflow-hidden">
                 <div className="p-8 space-y-8">
                     {/* 정보 안내 카드 */}
-                    <div className="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-900/20 space-y-4">
+                    <div className="bg-indigo-50 rounded-2xl p-6 border border-indigo-100 space-y-4">
                         <div className="flex items-start gap-4">
                             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-200">
                                 <Info size={20} />
                             </div>
                             <div className="space-y-1">
-                                <h3 className="font-bold text-indigo-900 dark:text-indigo-400">내보내기 정보</h3>
-                                <p className="text-sm text-indigo-700/80 dark:text-indigo-300/80 leading-relaxed">
+                                <h3 className="font-bold text-indigo-900">내보내기 정보</h3>
+                                <p className="text-sm text-indigo-700/80 leading-relaxed">
                                     설정된 사역자 성함(<span className="font-bold">{profile?.name || user?.displayName || '미지정'}</span>)으로
                                     주간 사역 보고서가 작성됩니다.
                                 </p>
@@ -88,11 +88,11 @@ const ExportPage: React.FC = () => {
                         <div className="grid grid-cols-2 gap-3 pt-2">
                             <div className="bg-card/50 p-3 rounded-xl border border-indigo-100/30">
                                 <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mb-1">총 기록수</p>
-                                <p className="text-lg font-black text-indigo-900 dark:text-indigo-400">{entries.length}건</p>
+                                <p className="text-lg font-black text-indigo-900">{entries.length}건</p>
                             </div>
                             <div className="bg-card/50 p-3 rounded-xl border border-indigo-100/30">
                                 <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mb-1">선택 주차</p>
-                                <p className="text-lg font-black text-indigo-900 dark:text-indigo-400">{format(currentWeekStart, 'M월 d일')}</p>
+                                <p className="text-lg font-black text-indigo-900">{format(currentWeekStart, 'M월 d일')}</p>
                             </div>
                         </div>
                     </div>

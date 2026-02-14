@@ -35,7 +35,7 @@ const WeekSelector: React.FC<WeekSelectorProps> = ({ currentWeekStart, onWeekCha
                 </span>
                 <button
                     onClick={handleToday}
-                    className="text-xs text-[#007AFF] mt-1 flex items-center gap-1 font-bold hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2.5 py-1 rounded-lg transition-all"
+                    className="text-xs text-[#007AFF] mt-1 flex items-center gap-1 font-bold hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-all"
                 >
                     <Calendar size={12} />
                     이번 주로 이동

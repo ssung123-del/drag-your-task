@@ -44,7 +44,7 @@ const DashboardPage: React.FC = () => {
                         <TrendingUp size={64} className="text-blue-500" />
                     </div>
                     <div className="flex items-center gap-2 mb-2">
-                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                        <div className="p-2 bg-blue-50 rounded-xl">
                             <TrendingUp size={20} className="text-blue-500" />
                         </div>
                         <span className="text-sm font-semibold text-text-secondary">방문심방</span>
@@ -57,7 +57,7 @@ const DashboardPage: React.FC = () => {
                         <Coffee size={64} className="text-orange-500" />
                     </div>
                     <div className="flex items-center gap-2 mb-2">
-                        <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                        <div className="p-2 bg-orange-50 rounded-xl">
                             <Coffee size={20} className="text-orange-500" />
                         </div>
                         <span className="text-sm font-semibold text-text-secondary">카페심방</span>
@@ -70,7 +70,7 @@ const DashboardPage: React.FC = () => {
                         <PhoneCall size={64} className="text-green-500" />
                     </div>
                     <div className="flex items-center gap-2 mb-2">
-                        <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                        <div className="p-2 bg-green-50 rounded-xl">
                             <PhoneCall size={20} className="text-green-500" />
                         </div>
                         <span className="text-sm font-semibold text-text-secondary">전화심방</span>
@@ -96,7 +96,7 @@ const DashboardPage: React.FC = () => {
             <div>
                 <div className="flex justify-between items-center mb-4 px-1">
                     <h3 className="text-xl font-bold text-text">📋 주간 기록 ({weekEntries.length})</h3>
-                    <Link to="/history" className="text-sm text-[#007AFF] font-bold flex items-center hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-full transition-all">
+                    <Link to="/history" className="text-sm text-[#007AFF] font-bold flex items-center hover:bg-blue-50 px-3 py-1.5 rounded-full transition-all">
                         전체보기 <ChevronRight size={16} strokeWidth={3} />
                     </Link>
                 </div>

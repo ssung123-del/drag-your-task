@@ -52,11 +52,11 @@ const DroppableTimeSlot: React.FC<DroppableTimeSlotProps> = React.memo(({
             className={clsx(
                 "relative flex items-stretch rounded-xl transition-colors duration-150 group cursor-pointer border",
                 viewMode === 'day' ? "gap-3 min-h-[60px]" : "h-full flex-col p-1 gap-1 overflow-hidden",
-                isHighlighted && "ring-2 ring-emerald-400 border-emerald-200 bg-emerald-50/40 dark:bg-emerald-900/20",
+                isHighlighted && "ring-2 ring-emerald-400 border-emerald-200 bg-emerald-50/40",
                 isOver
-                    ? "bg-indigo-50 dark:bg-indigo-900/20 ring-2 ring-indigo-300 border-transparent"
+                    ? "bg-indigo-50 ring-2 ring-indigo-300 border-transparent"
                     : isTodaySlot
-                        ? "bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                        ? "bg-indigo-50/30 border-indigo-100 hover:bg-indigo-50"
                         : "bg-card border-border/50 hover:bg-background/80 active:bg-background"
             )}
         >
@@ -64,7 +64,7 @@ const DroppableTimeSlot: React.FC<DroppableTimeSlotProps> = React.memo(({
                 <div className="w-16 md:w-20 shrink-0 flex items-center justify-center border-r border-border/50">
                     <span className={clsx(
                         "text-xs md:text-sm font-bold tabular-nums",
-                        isMealTime ? "text-orange-500" : (isOver ? "text-indigo-600 dark:text-indigo-400" : "text-text-secondary")
+                        isMealTime ? "text-orange-500" : (isOver ? "text-indigo-600" : "text-text-secondary")
                     )}>
                         {getTimeLabel(time)}
                     </span>
@@ -99,7 +99,9 @@ const DroppableTimeSlot: React.FC<DroppableTimeSlotProps> = React.memo(({
         prev.viewMode === next.viewMode &&
         prev.isTodaySlot === next.isTodaySlot &&
         prev.isHighlighted === next.isHighlighted &&
-        prev.entries === next.entries;
+        prev.entries === next.entries &&
+        prev.onEdit === next.onEdit &&
+        prev.onQuickAdd === next.onQuickAdd;
 });
 
 export default DroppableTimeSlot;

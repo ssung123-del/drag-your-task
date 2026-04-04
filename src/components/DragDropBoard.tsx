@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
     DndContext,
     DragOverlay,
@@ -12,7 +12,7 @@ import {
 } from '@dnd-kit/core';
 import { useMinistryStore } from '../store/useMinistryStore';
 import { type MinistryEntry, type SubType, type Category, TIME_SLOTS } from '../types';
-import { format, addDays, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, addDays, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { X, Check, ChevronLeft, ChevronRight, Info, Copy, ArrowRightLeft } from 'lucide-react';
 import clsx from 'clsx';
@@ -213,9 +213,16 @@ const DragDropBoard: React.FC = () => {
     const updateEntry = useMinistryStore(state => state.updateEntry);
     const deleteEntry = useMinistryStore(state => state.deleteEntry);
 
+    // 최신 entries에 접근하기 위한 ref — handleEdit 콜백의 참조를 안정적으로 유지
+    const entriesRef = useRef(entries);
+    entriesRef.current = entries;
+
     // State
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
+
+    // 오늘 날짜를 1회만 계산하여 캐싱 — 매 슬롯마다 new Date() 생성 방지
+    const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
 
     // Drag & Modal State
     const [activeDragData, setActiveDragData] = useState<ActiveDragData | null>(null);
@@ -289,14 +296,23 @@ const DragDropBoard: React.FC = () => {
     }, [entries, weekDates]);
 
     const entriesBySlot = useMemo(() => {
-        const map = new Map<string, typeof viewEntries>();
+        const map = new Map<string, BoardEntryItem[]>();
         for (const entry of viewEntries) {
             const key = `${entry.date}|${entry.time}`;
+            // MinistryEntry → BoardEntryItem 변환을 여기서 1회만 수행하여 캐싱
+            const boardItem: BoardEntryItem = {
+                id: entry.id,
+                subType: entry.subType,
+                content: entry.content,
+                category: entry.category,
+                time: entry.time,
+                date: entry.date,
+            };
             const list = map.get(key);
             if (list) {
-                list.push(entry);
+                list.push(boardItem);
             } else {
-                map.set(key, [entry]);
+                map.set(key, [boardItem]);
             }
         }
         return map;
@@ -438,15 +454,16 @@ const DragDropBoard: React.FC = () => {
         setShowQuickModal(true);
     }, []);
 
-    // Edit handler - useCallback으로 안정화
+    // Edit handler - entriesRef를 사용하여 콜백 참조를 안정화
+    // entries가 바뀌어도 handleEdit 참조는 유지되므로 DroppableTimeSlot의 memo가 깨지지 않음
     const handleEdit = useCallback((id: string, e?: React.MouseEvent) => {
         e?.stopPropagation();
-        const entry = entries.find(e => e.id === id);
+        const entry = entriesRef.current.find(e => e.id === id);
         if (entry) {
             setEditingEntry(entry);
             setShowEditModal(true);
         }
-    }, [entries]);
+    }, []);
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} autoScroll={false}>
@@ -569,7 +586,7 @@ const DragDropBoard: React.FC = () => {
                                 >
                                     <div className="p-3 text-center text-xs font-bold text-text-secondary border-r border-border">Time</div>
                                     {weekDates.map((d) => {
-                                        const isTodayDate = isSameDay(new Date(d), new Date());
+                                        const isTodayDate = d === todayStr;
                                         return (
                                             <div key={d} className={clsx(
                                                 "p-2 text-center border-r border-border last:border-r-0 flex flex-col items-center justify-center gap-1",
@@ -621,7 +638,7 @@ const DragDropBoard: React.FC = () => {
                                                             onEdit={handleEdit}
                                                             onQuickAdd={handleSlotClick}
                                                             viewMode="week"
-                                                            isTodaySlot={isSameDay(new Date(d), new Date())}
+                                                            isTodaySlot={d === todayStr}
                                                             isHighlighted={highlightedSlotKey === `${d}|${time}`}
                                                         />
                                                     </div>

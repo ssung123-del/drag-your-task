@@ -8,7 +8,7 @@ interface DraggableBlockProps {
     block: BlockItem;
 }
 
-const DraggableBlock: React.FC<DraggableBlockProps> = ({ block }) => {
+const DraggableBlock: React.FC<DraggableBlockProps> = React.memo(({ block }) => {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: block.id,
         data: { type: 'block', ...block },
@@ -33,6 +33,6 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({ block }) => {
             <span className="whitespace-nowrap">{block.label}</span>
         </div>
     );
-};
+});
 
 export default DraggableBlock;

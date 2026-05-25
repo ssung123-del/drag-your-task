@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { ClipboardList, BarChart2, Calendar, Download, Settings, LogOut, User } from 'lucide-react';
+import { ClipboardList, BarChart2, Calendar, Download, Settings, LogOut, User, Heart } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface LayoutProps {
@@ -61,6 +61,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const navItems = [
         { to: '/', icon: ClipboardList, label: '기록' },
+        { to: '/shepherding', icon: Heart, label: '목양수첩' },
         { to: '/dashboard', icon: BarChart2, label: '통계' },
         { to: '/plans', icon: Calendar, label: '계획' },
         { to: '/export', icon: Download, label: '내보내기' },

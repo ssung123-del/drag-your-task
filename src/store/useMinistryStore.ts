@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { type MinistryEntry, type WeeklyPlan, type WeeklyNote, type UserProfile } from '../types';
+import { type MinistryEntry, type WeeklyPlan, type WeeklyNote, type UserProfile, type Sheep } from '../types';
 import { db } from '../lib/firebase';
 import {
     doc,
@@ -14,12 +14,13 @@ interface MinistryState {
     entries: MinistryEntry[];
     weeklyPlans: WeeklyPlan[];
     weeklyNotes: WeeklyNote[];
-
     profile: UserProfile | null;
+    sheep: Sheep[];
 
     // Actions
     setUser: (user: UserAuth | null) => void;
     setEntries: (entries: MinistryEntry[]) => void;
+    setSheep: (sheep: Sheep[]) => void;
     addEntry: (entry: Omit<MinistryEntry, 'id' | 'createdAt'>) => Promise<void>;
     updateEntry: (id: string, entry: Partial<MinistryEntry>) => Promise<void>;
     deleteEntry: (id: string) => Promise<void>;
@@ -28,6 +29,11 @@ interface MinistryState {
 
     updateProfile: (profile: UserProfile) => Promise<void>;
     clearData: () => void;
+
+    // Sheep Actions
+    addSheep: (sheep: Omit<Sheep, 'id' | 'createdAt'>) => Promise<void>;
+    updateSheep: (id: string, sheep: Partial<Sheep>) => Promise<void>;
+    deleteSheep: (id: string) => Promise<void>;
 }
 
 type UserAuth = {
@@ -46,9 +52,11 @@ export const useMinistryStore = create<MinistryState>()(
             weeklyNotes: [],
 
             profile: null,
+            sheep: [],
 
             setUser: (user) => set({ user }),
             setEntries: (entries) => set({ entries }),
+            setSheep: (sheep) => set({ sheep }),
 
             addEntry: async (entryData) => {
                 const id = crypto.randomUUID();
@@ -119,8 +127,6 @@ export const useMinistryStore = create<MinistryState>()(
                 }
             },
 
-
-
             updateProfile: async (profile) => {
                 set({ profile });
                 const user = get().user;
@@ -129,7 +135,44 @@ export const useMinistryStore = create<MinistryState>()(
                 }
             },
 
-            clearData: () => set({ entries: [], weeklyPlans: [], weeklyNotes: [], profile: null }),
+            addSheep: async (sheepData) => {
+                const id = crypto.randomUUID();
+                const createdAt = new Date().toISOString();
+                const newSheep = { ...sheepData, id, createdAt } as Sheep;
+
+                set((state) => ({ sheep: [...state.sheep, newSheep] }));
+
+                const user = get().user;
+                if (user?.uid) {
+                    await setDoc(doc(db, 'users', user.uid, 'sheep', id), newSheep);
+                }
+            },
+
+            updateSheep: async (id, sheepUpdate) => {
+                set((state) => ({
+                    sheep: state.sheep.map((s) =>
+                        s.id === id ? { ...s, ...sheepUpdate } : s
+                    ),
+                }));
+
+                const user = get().user;
+                if (user?.uid) {
+                    await setDoc(doc(db, 'users', user.uid, 'sheep', id), sheepUpdate, { merge: true });
+                }
+            },
+
+            deleteSheep: async (id) => {
+                set((state) => ({
+                    sheep: state.sheep.filter((s) => s.id !== id),
+                }));
+
+                const user = get().user;
+                if (user?.uid) {
+                    await deleteDoc(doc(db, 'users', user.uid, 'sheep', id));
+                }
+            },
+
+            clearData: () => set({ entries: [], weeklyPlans: [], weeklyNotes: [], profile: null, sheep: [] }),
         }),
         {
             name: 'ministry-store',
@@ -137,8 +180,8 @@ export const useMinistryStore = create<MinistryState>()(
                 entries: state.entries,
                 weeklyPlans: state.weeklyPlans,
                 weeklyNotes: state.weeklyNotes,
-
                 profile: state.profile,
+                sheep: state.sheep,
             }),
         }
     )

@@ -14,6 +14,16 @@ export interface MinistryEntry {
     content: string;
     isHighlight: boolean;
     createdAt: string;
+    taggedSheepIds?: string[]; // 태깅된 성도 ID 목록
+}
+
+export interface Sheep {
+    id: string;
+    name: string;
+    phone?: string;
+    department?: string;
+    prayerRequest?: string;
+    createdAt: string;
 }
 
 export interface WeeklyPlan {

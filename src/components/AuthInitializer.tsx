@@ -4,7 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { useMinistryStore } from '../store/useMinistryStore';
-import { type MinistryEntry, type WeeklyPlan, type WeeklyNote, type UserProfile, type Sheep } from '../types';
+import { type MinistryEntry, type WeeklyPlan, type WeeklyNote, type UserProfile } from '../types';
 
 /**
  * AuthInitializer: 로그인 상태 변화를 감지하고 데이터를 동기화함
@@ -118,21 +118,11 @@ export const AuthInitializer = () => {
             }
         );
 
-        // 5. 성도(Sheep) 리스너
-        const sheepSub = onSnapshot(
-            collection(db, 'users', userUID, 'sheep'),
-            (snapshot) => {
-                const sheepList = snapshot.docs.map(doc => doc.data() as Sheep);
-                useMinistryStore.setState({ sheep: sheepList.sort((a, b) => a.name.localeCompare(b.name)) });
-            }
-        );
-
         return () => {
             entriesSub();
             plansSub();
             notesSub();
             profileSub();
-            sheepSub();
         };
     }, [userUID]);
 

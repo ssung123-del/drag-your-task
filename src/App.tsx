@@ -9,7 +9,6 @@ const PlansPage = lazy(() => import('./pages/PlansPage'));
 const ExportPage = lazy(() => import('./pages/ExportPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage'));
-const ShepherdingPage = lazy(() => import('./pages/ShepherdingPage'));
 
 function App() {
   return (
@@ -19,7 +18,6 @@ function App() {
         <Suspense fallback={<div className="p-6 text-sm text-text-secondary">화면을 불러오는 중...</div>}>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/shepherding" element={<ShepherdingPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/plans" element={<PlansPage />} />
             <Route path="/export" element={<ExportPage />} />

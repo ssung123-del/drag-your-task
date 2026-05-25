@@ -14,7 +14,6 @@ type FormValues = {
     subType: SubType;
     content: string;
     isHighlight: boolean;
-    taggedSheepIds: string[];
 };
 
 const CATEGORIES: Category[] = ['심방', '업무', '기타'];
@@ -26,7 +25,7 @@ const SUB_TYPES: Record<Category, SubType[]> = {
 };
 
 const EntryForm: React.FC = () => {
-    const { addEntry, sheep } = useMinistryStore();
+    const { addEntry } = useMinistryStore();
     const [lastSaved, setLastSaved] = useState<string | null>(null);
 
     const { register, handleSubmit, watch, reset, setValue } = useForm<FormValues>({
@@ -37,12 +36,10 @@ const EntryForm: React.FC = () => {
             subType: '방문심방',
             content: '',
             isHighlight: false,
-            taggedSheepIds: [],
         }
     });
 
     const selectedCategory = watch('category');
-    const taggedSheepIds = watch('taggedSheepIds') || [];
 
     // Initialize with current time and date
     React.useEffect(() => {
@@ -65,23 +62,9 @@ const EntryForm: React.FC = () => {
         return TIME_SLOTS.includes(timeString) ? timeString : '09:00';
     };
 
-    const handleToggleSheep = (sheepId: string) => {
-        const current = [...taggedSheepIds];
-        const index = current.indexOf(sheepId);
-        if (index >= 0) {
-            current.splice(index, 1);
-        } else {
-            current.push(sheepId);
-        }
-        setValue('taggedSheepIds', current);
-    };
-
     // Update the submit handler to reset with CURRENT time
     const onSubmitHandler = (data: FormValues) => {
-        addEntry({
-            ...data,
-            taggedSheepIds: data.category === '심방' ? data.taggedSheepIds : []
-        });
+        addEntry(data);
         const now = new Date();
         setLastSaved(format(now, 'HH:mm:ss'));
 
@@ -92,7 +75,6 @@ const EntryForm: React.FC = () => {
             time: getCurrentTimeSlot(), // Update to current time slot
             content: '',
             isHighlight: false,
-            taggedSheepIds: [],
         });
 
         setTimeout(() => setLastSaved(null), 3000);
@@ -168,33 +150,6 @@ const EntryForm: React.FC = () => {
                         ))}
                     </select>
                 </div>
-
-                {/* Sheep Tagging (Only for 심방 category) */}
-                {selectedCategory === '심방' && sheep.length > 0 && (
-                    <div className="space-y-2 animate-fade-in">
-                        <label className="block text-sm font-semibold text-text-secondary ml-1">심방 대상자 태그</label>
-                        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 bg-background rounded-2xl border border-border/40">
-                            {sheep.map(s => {
-                                const isTagged = taggedSheepIds.includes(s.id);
-                                return (
-                                    <button
-                                        key={s.id}
-                                        type="button"
-                                        onClick={() => handleToggleSheep(s.id)}
-                                        className={clsx(
-                                            "px-3 py-1.5 rounded-xl text-xs font-bold transition-all border active:scale-95",
-                                            isTagged
-                                                ? "bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-500/20"
-                                                : "bg-card border-border/60 text-text-secondary hover:text-text"
-                                        )}
-                                    >
-                                        🐑 {s.name}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
 
                 {/* Content */}
                 <div className="space-y-2">

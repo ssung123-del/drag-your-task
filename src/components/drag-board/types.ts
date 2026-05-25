@@ -18,5 +18,4 @@ export interface BoardEntryItem {
     category: string;
     time: string;
     date: string;
-    taggedSheepIds?: string[];
 }

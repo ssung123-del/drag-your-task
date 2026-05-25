@@ -43,35 +43,20 @@ const DetailModal: React.FC<{
     time: string;
     date: string;
     initialContent?: string;
-    onConfirm: (subType: SubType, content: string, taggedSheepIds?: string[]) => void;
+    onConfirm: (subType: SubType, content: string) => void;
     onCancel: () => void;
 }> = ({ block, time, date, initialContent, onConfirm, onCancel }) => {
     const defaultSubType: SubType = block?.subTypes?.[0]?.value || '기타';
     const [selectedSubType, setSelectedSubType] = useState<SubType>(defaultSubType);
     const [content, setContent] = useState(initialContent || '');
-    const [taggedSheepIds, setTaggedSheepIds] = useState<string[]>([]);
-
-    const sheep = useMinistryStore(state => state.sheep);
 
     // ESC 키로 모달 닫기
     useEscapeKey(onCancel);
 
     if (!block) return null;
 
-    const handleToggleSheep = (sheepId: string) => {
-        setTaggedSheepIds(current => 
-            current.includes(sheepId)
-                ? current.filter(id => id !== sheepId)
-                : [...current, sheepId]
-        );
-    };
-
     const handleSubmit = () => {
-        onConfirm(
-            selectedSubType, 
-            content.trim() || `${selectedSubType} 진행`, 
-            block.category === '심방' ? taggedSheepIds : []
-        );
+        onConfirm(selectedSubType, content.trim() || `${selectedSubType} 진행`);
     };
 
     return (
@@ -120,39 +105,12 @@ const DetailModal: React.FC<{
                     </div>
                 </div>
 
-                {/* Sheep Tagging (Only for 심방 category) */}
-                {block.category === '심방' && sheep.length > 0 && (
-                    <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-text-secondary ml-1">심방 대상 성도 태그</label>
-                        <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-background rounded-lg border border-border/50">
-                            {sheep.map(s => {
-                                const isTagged = taggedSheepIds.includes(s.id);
-                                return (
-                                    <button
-                                        key={s.id}
-                                        type="button"
-                                        onClick={() => handleToggleSheep(s.id)}
-                                        className={clsx(
-                                            "px-2.5 py-1 rounded-lg text-xs font-bold transition-all border active:scale-95",
-                                            isTagged
-                                                ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
-                                                : "bg-card border-border/60 text-text-secondary hover:text-text"
-                                        )}
-                                    >
-                                        🐑 {s.name}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
                 <div className="space-y-2">
                     <label className="block text-sm font-semibold text-text-secondary ml-1">사역 내용</label>
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        className="w-full px-4 py-3 bg-background rounded-lg text-text font-medium h-24 focus:bg-card focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none placeholder:text-text-secondary/50 border border-border/50"
+                        className="w-full px-4 py-3 bg-background rounded-lg text-text font-medium h-28 focus:bg-card focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none placeholder:text-text-secondary/50 border border-border/50"
                         placeholder="사역 내용을 자유롭게 입력하세요..."
                         autoFocus
                         aria-label="사역 내용 입력"
@@ -472,7 +430,7 @@ const DragDropBoard: React.FC = () => {
         setShowModal(true);
     }, []);
 
-    const handleFinalConfirm = useCallback(async (subType: SubType, content: string, taggedSheepIds?: string[]) => {
+    const handleFinalConfirm = useCallback(async (subType: SubType, content: string) => {
         if (!pendingDrop) return;
 
         const category = pendingDrop.data?.category ?? selectedBlockForModal?.category;
@@ -485,7 +443,6 @@ const DragDropBoard: React.FC = () => {
             subType,
             content,
             isHighlight: false,
-            taggedSheepIds: category === '심방' ? taggedSheepIds : []
         });
 
         setShowModal(false);
@@ -769,8 +726,8 @@ const DragDropBoard: React.FC = () => {
             {showEditModal && editingEntry && (
                 <EditModal
                     entry={editingEntry}
-                    onConfirm={async (id, subType, content, taggedSheepIds) => {
-                        await updateEntry(id, { subType, content, taggedSheepIds });
+                    onConfirm={async (id, subType, content) => {
+                        await updateEntry(id, { subType, content });
                         flashSlot(editingEntry.date, editingEntry.time);
                         setShowEditModal(false);
                         setEditingEntry(null);
@@ -832,18 +789,15 @@ const QuickCategoryModal: React.FC<{
 // ─── Edit Modal ───────────────────────────────────────────────
 const EditModal: React.FC<{
     entry: MinistryEntry;
-    onConfirm: (id: string, subType: SubType, content: string, taggedSheepIds?: string[]) => void;
+    onConfirm: (id: string, subType: SubType, content: string) => void;
     onCancel: () => void;
     onDelete: (id: string) => void;
 }> = ({ entry, onConfirm, onCancel, onDelete }) => {
     const block = MINISTRY_BLOCKS.find(b => b.category === entry.category) || MINISTRY_BLOCKS[0];
     const [selectedSubType, setSelectedSubType] = useState<SubType>(entry.subType as SubType);
     const [content, setContent] = useState(entry.content);
-    const [taggedSheepIds, setTaggedSheepIds] = useState<string[]>(entry.taggedSheepIds || []);
     // confirm() 대신 인라인 삭제 확인 — 모달 뒤로 가려지는 문제 방지
     const [confirmDelete, setConfirmDelete] = useState(false);
-
-    const sheep = useMinistryStore(state => state.sheep);
 
     // ESC 키로 닫기 (삭제 확인 중이면 확인 상태만 취소)
     useEscapeKey(() => {
@@ -854,21 +808,8 @@ const EditModal: React.FC<{
         }
     });
 
-    const handleToggleSheep = (sheepId: string) => {
-        setTaggedSheepIds(current => 
-            current.includes(sheepId)
-                ? current.filter(id => id !== sheepId)
-                : [...current, sheepId]
-        );
-    };
-
     const handleSubmit = () => {
-        onConfirm(
-            entry.id, 
-            selectedSubType, 
-            content.trim() || `${selectedSubType} 진행`, 
-            entry.category === '심방' ? taggedSheepIds : []
-        );
+        onConfirm(entry.id, selectedSubType, content.trim() || `${selectedSubType} 진행`);
     };
 
     return (
@@ -943,40 +884,12 @@ const EditModal: React.FC<{
                         ))}
                     </div>
                 </div>
-
-                {/* Sheep Tagging (Only for 심방 category) */}
-                {entry.category === '심방' && sheep.length > 0 && (
-                    <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-text-secondary ml-1">심방 대상 성도 태그</label>
-                        <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-background rounded-lg border border-border/50">
-                            {sheep.map(s => {
-                                const isTagged = taggedSheepIds.includes(s.id);
-                                return (
-                                    <button
-                                        key={s.id}
-                                        type="button"
-                                        onClick={() => handleToggleSheep(s.id)}
-                                        className={clsx(
-                                            "px-2.5 py-1 rounded-lg text-xs font-bold transition-all border active:scale-95",
-                                            isTagged
-                                                ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
-                                                : "bg-card border-border/60 text-text-secondary hover:text-text"
-                                        )}
-                                    >
-                                        🐑 {s.name}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
                 <div className="space-y-2">
                     <label className="block text-sm font-semibold text-text-secondary ml-1">사역 내용</label>
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        className="w-full px-4 py-3 bg-background rounded-lg text-text font-medium h-24 focus:bg-card focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none placeholder:text-text-secondary/50 border border-border/50"
+                        className="w-full px-4 py-3 bg-background rounded-lg text-text font-medium h-28 focus:bg-card focus:ring-2 focus:ring-[#007AFF] focus:outline-none resize-none placeholder:text-text-secondary/50 border border-border/50"
                         aria-label="사역 내용 수정"
                         autoFocus
                     />

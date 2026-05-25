@@ -2,7 +2,7 @@ export type Category = '심방' | '업무' | '기타';
 
 export type SubType =
     | '방문심방' | '카페심방' | '전화심방' // 심방
-    | '회의' | '행정' | '기타' // 업무
+    | '업무' // 업무
     | '새벽기도' | '기타'; // 기타
 
 export interface MinistryEntry {

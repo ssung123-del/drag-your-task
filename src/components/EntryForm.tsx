@@ -20,7 +20,7 @@ const CATEGORIES: Category[] = ['심방', '업무', '기타'];
 
 const SUB_TYPES: Record<Category, SubType[]> = {
     '심방': ['방문심방', '카페심방', '전화심방'],
-    '업무': ['회의', '행정', '기타'],
+    '업무': ['업무'],
     '기타': ['새벽기도', '기타'],
 };
 

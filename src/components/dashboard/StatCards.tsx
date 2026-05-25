@@ -72,6 +72,16 @@ const StatCards: React.FC<StatCardsProps> = React.memo(({ stats, diff }) => {
       badge: 'bg-green-50',
       badgeIcon: 'p-2 bg-green-50 rounded-xl',
     },
+    {
+      label: '업무',
+      value: stats.work,
+      diff: diff.work,
+      icon: BarChart2,
+      color: 'purple',
+      bgIcon: 'text-purple-500',
+      badge: 'bg-purple-50',
+      badgeIcon: 'p-2 bg-purple-50 rounded-xl',
+    },
   ];
 
   return (

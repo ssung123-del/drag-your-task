@@ -23,9 +23,7 @@ export const MINISTRY_BLOCKS: BlockItem[] = [
         color: 'bg-green-500',
         textColor: 'text-white',
         subTypes: [
-            { value: '회의', label: '회의' },
-            { value: '행정', label: '행정' },
-            { value: '기타', label: '기타' },
+            { value: '업무', label: '업무' },
         ],
     },
 ];

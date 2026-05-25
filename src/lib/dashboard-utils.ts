@@ -16,8 +16,7 @@ export interface WeeklyStats {
   visit: number;
   cafe: number;
   phone: number;
-  meeting: number;
-  admin: number;
+  work: number;
   total: number;
 }
 
@@ -26,6 +25,7 @@ export interface StatsDiff {
   visit: number;
   cafe: number;
   phone: number;
+  work: number;
   total: number;
 }
 
@@ -87,8 +87,7 @@ export function calcWeeklyStats(weekEntries: MinistryEntry[]): WeeklyStats {
     visit: weekEntries.filter((e) => e.subType === '방문심방').length,
     cafe: weekEntries.filter((e) => e.subType === '카페심방').length,
     phone: weekEntries.filter((e) => e.subType === '전화심방').length,
-    meeting: weekEntries.filter((e) => e.subType === '회의').length,
-    admin: weekEntries.filter((e) => e.subType === '행정').length,
+    work: weekEntries.filter((e) => e.subType === '업무').length,
     total: weekEntries.length,
   };
 }
@@ -102,6 +101,7 @@ export function calcStatsDiff(
     visit: currentStats.visit - prevStats.visit,
     cafe: currentStats.cafe - prevStats.cafe,
     phone: currentStats.phone - prevStats.phone,
+    work: currentStats.work - prevStats.work,
     total: currentStats.total - prevStats.total,
   };
 }

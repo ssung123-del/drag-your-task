@@ -1,137 +1,145 @@
+/**
+ * DashboardPage.tsx
+ *
+ * 사역 인사이트 대시보드 — 5개 섹션으로 구성
+ * 1. 핵심 요약 카드 (전주 대비 변화량)
+ * 2. 최근 4주 추이 차트
+ * 3. 요일×시간 히트맵
+ * 4. 새벽기도 출석 트래커
+ * 5. 계획 vs 실행 비교
+ *
+ * 왜 기존 페이지를 확장했는가? → 새 페이지를 추가하면 탭이 늘어나 UX 복잡해짐
+ */
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
 import WeekSelector from '../components/WeekSelector';
 import { useMinistryStore } from '../store/useMinistryStore';
-import { startOfWeek, format } from 'date-fns';
-import { ko } from 'date-fns/locale';
-import { BarChart2, Coffee, PhoneCall, TrendingUp, ChevronRight } from 'lucide-react';
+import { startOfWeek, addDays, format } from 'date-fns';
+
+// 대시보드 컴포넌트들
+import StatCards from '../components/dashboard/StatCards';
+import WeeklyTrendChart from '../components/dashboard/WeeklyTrendChart';
+import HeatmapGrid from '../components/dashboard/HeatmapGrid';
+import PrayerTracker from '../components/dashboard/PrayerTracker';
+import PlanVsExecution from '../components/dashboard/PlanVsExecution';
+
+// 유틸 함수들
+import {
+  getEntriesForWeek,
+  calcWeeklyStats,
+  calcStatsDiff,
+  calcWeeklyTrend,
+  calcHeatmapData,
+  calcPrayerData,
+  calcPlanVsExecution,
+} from '../lib/dashboard-utils';
 
 const DashboardPage: React.FC = () => {
-    const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
-    const { entries } = useMinistryStore();
+  const [currentWeekStart, setCurrentWeekStart] = useState(
+    startOfWeek(new Date(), { weekStartsOn: 0 })
+  );
 
-    const weekEntries = entries.filter((entry) => {
-        const entryDate = new Date(entry.date);
-        const nextWeekStart = new Date(currentWeekStart);
-        nextWeekStart.setDate(currentWeekStart.getDate() + 7);
-        return entryDate >= currentWeekStart && entryDate < nextWeekStart;
-    });
+  // 필요한 상태만 개별 selector로 구독 — 불필요한 리렌더 방지
+  const entries = useMinistryStore((state) => state.entries);
+  const weeklyPlans = useMinistryStore((state) => state.weeklyPlans);
+  const weeklyNotes = useMinistryStore((state) => state.weeklyNotes);
 
-    // Calculate Stats
-    const stats = {
-        visit: weekEntries.filter(e => e.subType === '방문심방').length,
-        cafe: weekEntries.filter(e => e.subType === '카페심방').length,
-        phone: weekEntries.filter(e => e.subType === '전화심방').length,
-        total: weekEntries.length
-    };
+  // ─── 섹션 1: 핵심 요약 카드 ─────────────────────────────
+  const currentWeekEntries = useMemo(
+    () => getEntriesForWeek(entries, currentWeekStart),
+    [entries, currentWeekStart]
+  );
 
-    return (
-        <div className="p-4 space-y-8 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-text flex items-center gap-2">
-                📊 주간 통계
-            </h2>
+  const prevWeekStart = useMemo(
+    () => addDays(currentWeekStart, -7),
+    [currentWeekStart]
+  );
 
-            <WeekSelector
-                currentWeekStart={currentWeekStart}
-                onWeekChange={setCurrentWeekStart}
-            />
+  const prevWeekEntries = useMemo(
+    () => getEntriesForWeek(entries, prevWeekStart),
+    [entries, prevWeekStart]
+  );
 
-            {/* Stats Cards Grid - 모바일 2칸, 태블릿/PC 4칸 */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-card p-5 rounded-3xl shadow-lg border border-border flex flex-col justify-between h-36 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <TrendingUp size={64} className="text-blue-500" />
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="p-2 bg-blue-50 rounded-xl">
-                            <TrendingUp size={20} className="text-blue-500" />
-                        </div>
-                        <span className="text-sm font-semibold text-text-secondary">방문심방</span>
-                    </div>
-                    <span className="text-4xl font-bold tracking-tighter text-text">{stats.visit}</span>
-                </div>
+  const currentStats = useMemo(
+    () => calcWeeklyStats(currentWeekEntries),
+    [currentWeekEntries]
+  );
 
-                <div className="bg-card p-5 rounded-3xl shadow-lg border border-border flex flex-col justify-between h-36 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Coffee size={64} className="text-orange-500" />
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="p-2 bg-orange-50 rounded-xl">
-                            <Coffee size={20} className="text-orange-500" />
-                        </div>
-                        <span className="text-sm font-semibold text-text-secondary">카페심방</span>
-                    </div>
-                    <span className="text-4xl font-bold tracking-tighter text-text">{stats.cafe}</span>
-                </div>
+  const prevStats = useMemo(
+    () => calcWeeklyStats(prevWeekEntries),
+    [prevWeekEntries]
+  );
 
-                <div className="bg-card p-5 rounded-3xl shadow-lg border border-border flex flex-col justify-between h-36 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <PhoneCall size={64} className="text-green-500" />
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="p-2 bg-green-50 rounded-xl">
-                            <PhoneCall size={20} className="text-green-500" />
-                        </div>
-                        <span className="text-sm font-semibold text-text-secondary">전화심방</span>
-                    </div>
-                    <span className="text-4xl font-bold tracking-tighter text-text">{stats.phone}</span>
-                </div>
+  const statsDiff = useMemo(
+    () => calcStatsDiff(currentStats, prevStats),
+    [currentStats, prevStats]
+  );
 
-                <div className="bg-[#007AFF] p-5 rounded-3xl shadow-lg shadow-blue-500/30 border border-blue-500 flex flex-col justify-between h-36 relative overflow-hidden group hover:shadow-blue-500/40 transition-all duration-300">
-                    <div className="absolute top-0 right-0 p-4 opacity-20 transform scale-110">
-                        <BarChart2 size={70} className="text-white" />
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                            <BarChart2 size={20} className="text-white" />
-                        </div>
-                        <span className="text-sm font-semibold text-blue-100">전체합계</span>
-                    </div>
-                    <span className="text-4xl font-bold tracking-tighter text-white">{stats.total}</span>
-                </div>
-            </div>
+  // ─── 섹션 2: 4주 추이 차트 ──────────────────────────────
+  const trendData = useMemo(
+    () => calcWeeklyTrend(entries, currentWeekStart),
+    [entries, currentWeekStart]
+  );
 
-            {/* Recent Activity List */}
-            <div>
-                <div className="flex justify-between items-center mb-4 px-1">
-                    <h3 className="text-xl font-bold text-text">📋 주간 기록 ({weekEntries.length})</h3>
-                    <Link to="/history" className="text-sm text-[#007AFF] font-bold flex items-center hover:bg-blue-50 px-3 py-1.5 rounded-full transition-all">
-                        전체보기 <ChevronRight size={16} strokeWidth={3} />
-                    </Link>
-                </div>
+  // ─── 섹션 3: 히트맵 ─────────────────────────────────────
+  const heatmapData = useMemo(
+    () => calcHeatmapData(entries),
+    [entries]
+  );
 
-                <div className="space-y-4">
-                    {weekEntries.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center p-12 text-text-secondary bg-card rounded-3xl border-2 border-dashed border-border">
-                            <span className="text-4xl mb-2">📭</span>
-                            <span className="font-medium text-text-secondary/80">이번 주 기록이 없습니다.</span>
-                        </div>
-                    ) : (
-                        weekEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(entry => (
-                            <div key={entry.id} className="bg-card p-5 rounded-3xl shadow-lg border border-border flex flex-col gap-3 transition-transform active:scale-[0.98]">
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-2">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${entry.category === '심방' ? 'bg-blue-100 text-blue-700' :
-                                            entry.category === '업무' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-                                            }`}>
-                                            {entry.subType}
-                                        </span>
-                                    </div>
-                                    <span className="text-xs text-text-secondary font-semibold bg-background px-2 py-1 rounded-lg">
-                                        {format(new Date(entry.date), 'M.d(eee)', { locale: ko })} {entry.time}
-                                    </span>
-                                </div>
-                                <p className="text-text text-base font-medium leading-relaxed pl-1">
-                                    {entry.content}
-                                </p>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+  // ─── 섹션 4: 새벽기도 트래커 ─────────────────────────────
+  const prayerData = useMemo(
+    () => calcPrayerData(weeklyNotes, currentWeekStart, 8),
+    [weeklyNotes, currentWeekStart]
+  );
+
+  // ─── 섹션 5: 계획 vs 실행 ───────────────────────────────
+  const currentWeekPlan = useMemo(
+    () => {
+      const weekStr = format(currentWeekStart, 'yyyy-MM-dd');
+      return weeklyPlans.find((p) => p.weekStartDate === weekStr);
+    },
+    [weeklyPlans, currentWeekStart]
+  );
+
+  const planVsExecution = useMemo(
+    () => calcPlanVsExecution(currentWeekEntries, currentWeekPlan, currentWeekStart),
+    [currentWeekEntries, currentWeekPlan, currentWeekStart]
+  );
+
+  return (
+    <div className="p-4 space-y-8 max-w-4xl mx-auto pb-24">
+      <h2 className="text-2xl font-bold text-text flex items-center gap-2">
+        📊 사역 인사이트
+      </h2>
+
+      <WeekSelector
+        currentWeekStart={currentWeekStart}
+        onWeekChange={setCurrentWeekStart}
+      />
+
+      {/* 섹션 1: 핵심 요약 카드 */}
+      <StatCards stats={currentStats} diff={statsDiff} />
+
+      {/* 섹션 2 + 3: 추이 차트와 히트맵 — 넓은 화면에서 2열 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <WeeklyTrendChart data={trendData} />
+        <HeatmapGrid cells={heatmapData.cells} maxCount={heatmapData.maxCount} />
+      </div>
+
+      {/* 섹션 4 + 5: 새벽기도와 계획 비교 — 넓은 화면에서 2열 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PrayerTracker
+          weeks={prayerData.weeks}
+          totalDays={prayerData.totalDays}
+          totalPossible={prayerData.totalPossible}
+          avgPerWeek={prayerData.avgPerWeek}
+          longestStreak={prayerData.longestStreak}
+        />
+        <PlanVsExecution items={planVsExecution} />
+      </div>
+    </div>
+  );
 };
 
 export default DashboardPage;

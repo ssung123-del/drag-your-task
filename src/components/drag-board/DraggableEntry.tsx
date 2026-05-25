@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { Pencil } from 'lucide-react';
 import clsx from 'clsx';
@@ -12,9 +12,16 @@ interface DraggableEntryProps {
 
 // React.memo로 감싸서 동일한 entry면 리렌더 방지
 const DraggableEntry: React.FC<DraggableEntryProps> = React.memo(({ entry, viewMode, onEdit }) => {
+    // data 객체를 useMemo로 안정화 — 매 렌더마다 새 객체 생성 방지
+    // 이렇게 하지 않으면 dnd-kit 내부에서 매번 droppable을 재등록하여 성능 저하 발생
+    const dragData = useMemo(() => ({
+        type: 'entry' as const,
+        ...entry,
+    }), [entry.id, entry.subType, entry.content, entry.category, entry.time, entry.date]);
+
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: entry.id,
-        data: { type: 'entry', ...entry },
+        data: dragData,
     });
 
     return (

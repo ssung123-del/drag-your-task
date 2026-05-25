@@ -13,6 +13,8 @@ interface DroppableTimeSlotProps {
     viewMode: 'day' | 'week';
     isTodaySlot?: boolean;
     isHighlighted?: boolean;
+    // 드래그 활성 상태 — false이면 useDroppable을 비활성화하여 충돌 감지 오버헤드 제거
+    isDragActive?: boolean;
 }
 
 const DroppableTimeSlot: React.FC<DroppableTimeSlotProps> = React.memo(({
@@ -24,9 +26,11 @@ const DroppableTimeSlot: React.FC<DroppableTimeSlotProps> = React.memo(({
     viewMode,
     isTodaySlot,
     isHighlighted,
+    isDragActive = false,
 }) => {
     const slotId = `slot-${date}-${time}`;
-    const { setNodeRef, isOver } = useDroppable({ id: slotId });
+    // 드래그 중이 아닐 때는 droppable을 비활성화 → 72개의 충돌 감지 연산 제거
+    const { setNodeRef, isOver } = useDroppable({ id: slotId, disabled: !isDragActive });
 
     const getTimeLabel = (t: string) => {
         if (t === '11:40') return '점심';
@@ -99,6 +103,7 @@ const DroppableTimeSlot: React.FC<DroppableTimeSlotProps> = React.memo(({
         prev.viewMode === next.viewMode &&
         prev.isTodaySlot === next.isTodaySlot &&
         prev.isHighlighted === next.isHighlighted &&
+        prev.isDragActive === next.isDragActive &&
         prev.entries === next.entries &&
         prev.onEdit === next.onEdit &&
         prev.onQuickAdd === next.onQuickAdd;

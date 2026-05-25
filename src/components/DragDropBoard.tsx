@@ -226,6 +226,8 @@ const DragDropBoard: React.FC = () => {
 
     // Drag & Modal State
     const [activeDragData, setActiveDragData] = useState<ActiveDragData | null>(null);
+    // 드래그 활성 여부 — DroppableTimeSlot의 useDroppable 활성/비활성 제어
+    const [isDragActive, setIsDragActive] = useState(false);
 
     // Modals
     const [showModal, setShowModal] = useState(false);
@@ -336,6 +338,7 @@ const DragDropBoard: React.FC = () => {
 
     // Drag Handlers
     const handleDragStart = useCallback((event: DragStartEvent) => {
+        setIsDragActive(true); // 드래그 시작 → 72개 droppable 활성화
         const data = event.active.data.current;
         if (data && (data.type === 'block' || data.type === 'entry')) {
             setActiveDragData(data as ActiveDragData);
@@ -346,6 +349,7 @@ const DragDropBoard: React.FC = () => {
 
     const handleDragEnd = useCallback((event: DragEndEvent) => {
         setActiveDragData(null);
+        setIsDragActive(false); // 드래그 종료 → 72개 droppable 비활성화하여 리소스 절약
         const { over, active } = event;
         if (!over) return;
 
@@ -571,6 +575,7 @@ const DragDropBoard: React.FC = () => {
                                         onQuickAdd={handleSlotClick}
                                         viewMode="day"
                                         isHighlighted={highlightedSlotKey === `${selectedDate}|${time}`}
+                                        isDragActive={isDragActive}
                                     />
                                 ))}
                             </div>
@@ -640,6 +645,7 @@ const DragDropBoard: React.FC = () => {
                                                             viewMode="week"
                                                             isTodaySlot={d === todayStr}
                                                             isHighlighted={highlightedSlotKey === `${d}|${time}`}
+                                                            isDragActive={isDragActive}
                                                         />
                                                     </div>
                                                 ))}
